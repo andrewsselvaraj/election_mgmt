@@ -70,11 +70,11 @@ function editRecord(recordId) {
 // Populate form with record data
 function populateForm(record) {
     document.getElementById('mla_id').value = record.mla_id;
-    document.getElementById('Sl_No').value = record.Sl_No;
-    document.getElementById('Polling_station_No').value = record.Polling_station_No;
-    document.getElementById('Location_name_of_buiding').value = record.Location_name_of_buiding;
-    document.getElementById('Polling_Areas').value = record.Polling_Areas || '';
-    document.getElementById('Polling_Station_Type').value = record.Polling_Station_Type;
+    document.getElementById('sl_no').value = record.sl_no;
+    document.getElementById('polling_station_no').value = record.polling_station_no;
+    document.getElementById('location_name_of_building').value = record.location_name_of_building;
+    document.getElementById('polling_areas').value = record.polling_areas || '';
+    document.getElementById('polling_station_type').value = record.polling_station_type;
 }
 
 // Switch to edit mode
@@ -123,10 +123,10 @@ function closeModal() {
 // Validate form
 function validateForm() {
     const mlaId = document.getElementById('mla_id').value;
-    const slNo = document.getElementById('Sl_No').value;
-    const stationNo = document.getElementById('Polling_station_No').value;
-    const location = document.getElementById('Location_name_of_buiding').value;
-    const stationType = document.getElementById('Polling_Station_Type').value;
+    const slNo = document.getElementById('sl_no').value;
+    const stationNo = document.getElementById('polling_station_no').value;
+    const location = document.getElementById('location_name_of_building').value;
+    const stationType = document.getElementById('polling_station_type').value;
     
     // Check if all required fields are filled
     if (!mlaId || !slNo || !stationNo || !location || !stationType) {
@@ -153,11 +153,11 @@ function validateForm() {
 function saveFormData() {
     const formData = {
         mlaId: document.getElementById('mla_id').value,
-        slNo: document.getElementById('Sl_No').value,
-        stationNo: document.getElementById('Polling_station_No').value,
-        location: document.getElementById('Location_name_of_buiding').value,
-        areas: document.getElementById('Polling_Areas').value,
-        stationType: document.getElementById('Polling_Station_Type').value
+        slNo: document.getElementById('sl_no').value,
+        stationNo: document.getElementById('polling_station_no').value,
+        location: document.getElementById('location_name_of_building').value,
+        areas: document.getElementById('polling_areas').value,
+        stationType: document.getElementById('polling_station_type').value
     };
     
     localStorage.setItem('boothFormData', JSON.stringify(formData));
@@ -169,11 +169,11 @@ function loadFormData() {
     if (savedData && !isEditMode) {
         const formData = JSON.parse(savedData);
         document.getElementById('mla_id').value = formData.mlaId || '';
-        document.getElementById('Sl_No').value = formData.slNo || '';
-        document.getElementById('Polling_station_No').value = formData.stationNo || '';
-        document.getElementById('Location_name_of_buiding').value = formData.location || '';
-        document.getElementById('Polling_Areas').value = formData.areas || '';
-        document.getElementById('Polling_Station_Type').value = formData.stationType || 'Regular';
+        document.getElementById('sl_no').value = formData.slNo || '';
+        document.getElementById('polling_station_no').value = formData.stationNo || '';
+        document.getElementById('location_name_of_building').value = formData.location || '';
+        document.getElementById('polling_areas').value = formData.areas || '';
+        document.getElementById('polling_station_type').value = formData.stationType || 'Regular';
     }
 }
 

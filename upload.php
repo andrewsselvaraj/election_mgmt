@@ -221,6 +221,17 @@ if (isset($_GET['action']) && $_GET['action'] === 'download_template') {
     <div class="container">
         <a href="index.php" class="back-link">← Back to MP Master Management</a>
         
+        <!-- Breadcrumb Navigation -->
+        <nav class="breadcrumb">
+            <a href="index.php" class="breadcrumb-item">📊 MP Master</a>
+            <span class="breadcrumb-separator">→</span>
+            <a href="mla_index.php" class="breadcrumb-item">🏛️ MLA Master</a>
+            <span class="breadcrumb-separator">→</span>
+            <a href="booth_index.php" class="breadcrumb-item">🏛️ Booth Master</a>
+            <span class="breadcrumb-separator">→</span>
+            <span class="breadcrumb-item active">📤 Upload MP Data</span>
+        </nav>
+        
         <h1>Upload MP Data from Excel</h1>
         
         <?php if ($message): ?>

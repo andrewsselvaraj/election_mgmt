@@ -130,6 +130,7 @@ $stats = $mlaMaster->getStats();
             <h1>MLA Master Management System</h1>
             <div class="header-actions">
                 <a href="index.php" class="btn btn-secondary">📊 MP Master</a>
+                <a href="booth_index.php" class="btn btn-secondary">🏛️ Booth Master</a>
                 <a href="mla_upload.php" class="btn btn-secondary">📤 Upload Excel</a>
                 <?php if ($auth->hasPermission('users', 'read')): ?>
                     <a href="user_management.php" class="btn btn-warning">👥 Users</a>
@@ -142,6 +143,15 @@ $stats = $mlaMaster->getStats();
             <p>Welcome, <strong><?php echo htmlspecialchars($currentUser['first_name'] . ' ' . $currentUser['last_name']); ?></strong> 
                (<?php echo implode(', ', $currentUser['roles']); ?>)</p>
         </div>
+        
+        <!-- Breadcrumb Navigation -->
+        <nav class="breadcrumb">
+            <a href="index.php" class="breadcrumb-item">📊 MP Master</a>
+            <span class="breadcrumb-separator">→</span>
+            <a href="mla_index.php" class="breadcrumb-item active">🏛️ MLA Master</a>
+            <span class="breadcrumb-separator">→</span>
+            <a href="booth_index.php" class="breadcrumb-item">🏛️ Booth Master</a>
+        </nav>
         
         <!-- Statistics -->
         <div class="stats-container">

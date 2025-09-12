@@ -109,12 +109,12 @@ class BoothExcelProcessor {
             'mla_constituency_code' => ['mla_constituency_code', 'mla_code', 'mla id', 'mla_id', 'assembly_code'],
             'sl_no' => ['sl_no', 'sl no', 'serial_no', 'serial no', 'serial_number', 'serial number'],
             'polling_station_no' => ['polling_station_no', 'polling station no', 'station_no', 'station no', 'booth_no', 'booth no'],
-            'location_name_of_buiding' => ['location_name_of_buiding', 'location', 'building', 'location_name', 'location name', 'building_name', 'building name'],
+            'location_name_of_building' => ['location_name_of_building', 'location', 'building', 'location_name', 'location name', 'building_name', 'building name'],
             'polling_areas' => ['polling_areas', 'polling areas', 'areas', 'area', 'polling_area', 'polling area'],
             'polling_station_type' => ['polling_station_type', 'polling station type', 'station_type', 'station type', 'type', 'booth_type', 'booth type']
         ];
         
-        $requiredColumns = ['mla_constituency_code', 'sl_no', 'polling_station_no', 'location_name_of_buiding'];
+        $requiredColumns = ['mla_constituency_code', 'sl_no', 'polling_station_no', 'location_name_of_building'];
         $missingColumns = [];
         
         foreach ($requiredColumns as $required) {
@@ -173,34 +173,34 @@ class BoothExcelProcessor {
         if ($slNoIndex === false) {
             throw new Exception('Serial number column not found');
         }
-        $data['Sl_No'] = (int)$row[$slNoIndex];
+        $data['sl_no'] = (int)$row[$slNoIndex];
         
         // Map polling station number
         $stationNoIndex = $this->findColumnIndex($cleanHeader, ['polling_station_no', 'polling station no', 'station_no', 'station no', 'booth_no', 'booth no']);
         if ($stationNoIndex === false) {
             throw new Exception('Polling station number column not found');
         }
-        $data['Polling_station_No'] = trim($row[$stationNoIndex]);
+        $data['polling_station_no'] = trim($row[$stationNoIndex]);
         
         // Map location name
-        $locationIndex = $this->findColumnIndex($cleanHeader, ['location_name_of_buiding', 'location', 'building', 'location_name', 'location name', 'building_name', 'building name']);
+        $locationIndex = $this->findColumnIndex($cleanHeader, ['location_name_of_building', 'location', 'building', 'location_name', 'location name', 'building_name', 'building name']);
         if ($locationIndex === false) {
             throw new Exception('Location name column not found');
         }
-        $data['Location_name_of_buiding'] = trim($row[$locationIndex]);
+        $data['location_name_of_building'] = trim($row[$locationIndex]);
         
         // Map polling areas (optional)
         $areasIndex = $this->findColumnIndex($cleanHeader, ['polling_areas', 'polling areas', 'areas', 'area', 'polling_area', 'polling area']);
-        $data['Polling_Areas'] = $areasIndex !== false ? trim($row[$areasIndex]) : '';
+        $data['polling_areas'] = $areasIndex !== false ? trim($row[$areasIndex]) : '';
         
         // Map polling station type (optional, default to Regular)
         $typeIndex = $this->findColumnIndex($cleanHeader, ['polling_station_type', 'polling station type', 'station_type', 'station type', 'type', 'booth_type', 'booth type']);
-        $data['Polling_Station_Type'] = $typeIndex !== false ? trim($row[$typeIndex]) : 'Regular';
+        $data['polling_station_type'] = $typeIndex !== false ? trim($row[$typeIndex]) : 'Regular';
         
         // Validate polling station type
         $validTypes = ['Regular', 'Auxiliary', 'Special', 'Mobile'];
-        if (!in_array($data['Polling_Station_Type'], $validTypes)) {
-            $data['Polling_Station_Type'] = 'Regular'; // Default to Regular if invalid
+        if (!in_array($data['polling_station_type'], $validTypes)) {
+            $data['polling_station_type'] = 'Regular'; // Default to Regular if invalid
         }
         
         $data['created_by'] = $createdBy;

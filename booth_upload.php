@@ -116,6 +116,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['excel_file'])) {
                (<?php echo implode(', ', $currentUser['roles']); ?>)</p>
         </div>
         
+        <!-- Breadcrumb Navigation -->
+        <nav class="breadcrumb">
+            <a href="index.php" class="breadcrumb-item">📊 MP Master</a>
+            <span class="breadcrumb-separator">→</span>
+            <a href="mla_index.php" class="breadcrumb-item">🏛️ MLA Master</a>
+            <span class="breadcrumb-separator">→</span>
+            <a href="booth_index.php" class="breadcrumb-item">🏛️ Booth Master</a>
+            <span class="breadcrumb-separator">→</span>
+            <span class="breadcrumb-item active">📤 Upload Booth Data</span>
+        </nav>
+        
         <?php if ($message): ?>
             <div class="message <?php echo $messageType; ?>">
                 <?php echo htmlspecialchars($message); ?>

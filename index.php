@@ -128,6 +128,7 @@ $states = $mpMaster->getStates();
             <div class="header-actions">
                 <a href="upload.php" class="btn btn-secondary">📤 Upload Excel</a>
                 <a href="mla_index.php" class="btn btn-primary">🏛️ MLA Master</a>
+                <a href="booth_index.php" class="btn btn-primary">🏛️ Booth Master</a>
                 <?php if ($auth->hasPermission('users', 'read')): ?>
                     <a href="user_management.php" class="btn btn-warning">👥 Users</a>
                 <?php endif; ?>
@@ -139,6 +140,15 @@ $states = $mpMaster->getStates();
             <p>Welcome, <strong><?php echo htmlspecialchars($currentUser['first_name'] . ' ' . $currentUser['last_name']); ?></strong> 
                (<?php echo implode(', ', $currentUser['roles']); ?>)</p>
         </div>
+        
+        <!-- Breadcrumb Navigation -->
+        <nav class="breadcrumb">
+            <a href="index.php" class="breadcrumb-item active">📊 MP Master</a>
+            <span class="breadcrumb-separator">→</span>
+            <a href="mla_index.php" class="breadcrumb-item">🏛️ MLA Master</a>
+            <span class="breadcrumb-separator">→</span>
+            <a href="booth_index.php" class="breadcrumb-item">🏛️ Booth Master</a>
+        </nav>
         
         <?php if ($message): ?>
             <div class="message <?php echo $messageType; ?>">

@@ -25,15 +25,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 try {
                     $data = [
                         'mla_id' => $_POST['mla_id'],
-                        'Sl_No' => $_POST['Sl_No'],
-                        'Polling_station_No' => $_POST['Polling_station_No'],
-                        'Location_name_of_buiding' => $_POST['Location_name_of_buiding'],
-                        'Polling_Areas' => $_POST['Polling_Areas'],
-                        'Polling_Station_Type' => $_POST['Polling_Station_Type'],
+                        'sl_no' => $_POST['sl_no'],
+                        'polling_station_no' => $_POST['polling_station_no'],
+                        'location_name_of_building' => $_POST['location_name_of_building'],
+                        'polling_areas' => $_POST['polling_areas'],
+                        'polling_station_type' => $_POST['polling_station_type'],
                         'created_by' => $currentUser['first_name'] . ' ' . $currentUser['last_name']
                     ];
                     
-                    if ($boothMaster->stationExists($data['mla_id'], $data['Polling_station_No'])) {
+                    if ($boothMaster->stationExists($data['mla_id'], $data['polling_station_no'])) {
                         $message = 'Polling station number already exists in this MLA constituency!';
                         $messageType = 'error';
                     } else {
@@ -61,15 +61,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 try {
                     $data = [
                         'mla_id' => $_POST['mla_id'],
-                        'Sl_No' => $_POST['Sl_No'],
-                        'Polling_station_No' => $_POST['Polling_station_No'],
-                        'Location_name_of_buiding' => $_POST['Location_name_of_buiding'],
-                        'Polling_Areas' => $_POST['Polling_Areas'],
-                        'Polling_Station_Type' => $_POST['Polling_Station_Type'],
+                        'sl_no' => $_POST['sl_no'],
+                        'polling_station_no' => $_POST['polling_station_no'],
+                        'location_name_of_building' => $_POST['location_name_of_building'],
+                        'polling_areas' => $_POST['polling_areas'],
+                        'polling_station_type' => $_POST['polling_station_type'],
                         'updated_by' => $currentUser['first_name'] . ' ' . $currentUser['last_name']
                     ];
                     
-                    if ($boothMaster->stationExists($data['mla_id'], $data['Polling_station_No'], $_POST['booth_id'])) {
+                    if ($boothMaster->stationExists($data['mla_id'], $data['polling_station_no'], $_POST['booth_id'])) {
                         $message = 'Polling station number already exists in this MLA constituency!';
                         $messageType = 'error';
                     } else {
@@ -153,6 +153,15 @@ $stationTypes = $boothMaster->getPollingStationTypes();
                (<?php echo implode(', ', $currentUser['roles']); ?>)</p>
         </div>
         
+        <!-- Breadcrumb Navigation -->
+        <nav class="breadcrumb">
+            <a href="index.php" class="breadcrumb-item">📊 MP Master</a>
+            <span class="breadcrumb-separator">→</span>
+            <a href="mla_index.php" class="breadcrumb-item">🏛️ MLA Master</a>
+            <span class="breadcrumb-separator">→</span>
+            <a href="booth_index.php" class="breadcrumb-item active">🏛️ Booth Master</a>
+        </nav>
+        
         <!-- Statistics -->
         <div class="stats-container">
             <div class="stat-card">
@@ -201,29 +210,29 @@ $stationTypes = $boothMaster->getPollingStationTypes();
                 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="Sl_No">Serial Number:</label>
-                        <input type="number" id="Sl_No" name="Sl_No" required min="1">
+                        <label for="sl_no">Serial Number:</label>
+                        <input type="number" id="sl_no" name="sl_no" required min="1">
                     </div>
                     
                     <div class="form-group">
-                        <label for="Polling_station_No">Polling Station No:</label>
-                        <input type="text" id="Polling_station_No" name="Polling_station_No" required>
+                        <label for="polling_station_no">Polling Station No:</label>
+                        <input type="text" id="polling_station_no" name="polling_station_no" required>
                     </div>
                 </div>
                 
                 <div class="form-group">
-                    <label for="Location_name_of_buiding">Location Name of Building:</label>
-                    <input type="text" id="Location_name_of_buiding" name="Location_name_of_buiding" required>
+                    <label for="location_name_of_building">Location Name of Building:</label>
+                    <input type="text" id="location_name_of_building" name="location_name_of_building" required>
                 </div>
                 
                 <div class="form-group">
-                    <label for="Polling_Areas">Polling Areas:</label>
-                    <textarea id="Polling_Areas" name="Polling_Areas" rows="3"></textarea>
+                    <label for="polling_areas">Polling Areas:</label>
+                    <textarea id="polling_areas" name="polling_areas" rows="3"></textarea>
                 </div>
                 
                 <div class="form-group">
-                    <label for="Polling_Station_Type">Polling Station Type:</label>
-                    <select id="Polling_Station_Type" name="Polling_Station_Type" required>
+                    <label for="polling_station_type">Polling Station Type:</label>
+                    <select id="polling_station_type" name="polling_station_type" required>
                         <?php foreach ($stationTypes as $value => $label): ?>
                             <option value="<?php echo $value; ?>"><?php echo $label; ?></option>
                         <?php endforeach; ?>
@@ -275,12 +284,12 @@ $stationTypes = $boothMaster->getPollingStationTypes();
                         <?php else: ?>
                             <?php foreach ($records as $record): ?>
                                 <tr>
-                                    <td><?php echo htmlspecialchars($record['Sl_No']); ?></td>
-                                    <td><?php echo htmlspecialchars($record['Polling_station_No']); ?></td>
-                                    <td><?php echo htmlspecialchars($record['Location_name_of_buiding']); ?></td>
+                                    <td><?php echo htmlspecialchars($record['sl_no']); ?></td>
+                                    <td><?php echo htmlspecialchars($record['polling_station_no']); ?></td>
+                                    <td><?php echo htmlspecialchars($record['location_name_of_building']); ?></td>
                                     <td>
-                                        <span class="station-type <?php echo strtolower($record['Polling_Station_Type']); ?>">
-                                            <?php echo htmlspecialchars($record['Polling_Station_Type']); ?>
+                                        <span class="station-type <?php echo strtolower($record['polling_station_type']); ?>">
+                                            <?php echo htmlspecialchars($record['polling_station_type']); ?>
                                         </span>
                                     </td>
                                     <td><?php echo htmlspecialchars($record['mla_constituency_name']); ?></td>
@@ -290,10 +299,10 @@ $stationTypes = $boothMaster->getPollingStationTypes();
                                     <td><?php echo date('Y-m-d', strtotime($record['created_datetime'])); ?></td>
                                     <td class="actions">
                                         <?php if ($auth->hasPermission('booth', 'update')): ?>
-                                            <button onclick="editRecord('<?php echo $record['Booth_ID']; ?>')" class="edit-btn">Edit</button>
+                                            <button onclick="editRecord('<?php echo $record['booth_id']; ?>')" class="edit-btn">Edit</button>
                                         <?php endif; ?>
                                         <?php if ($auth->hasPermission('booth', 'delete')): ?>
-                                            <button onclick="deleteRecord('<?php echo $record['Booth_ID']; ?>', '<?php echo htmlspecialchars($record['Polling_station_No']); ?>')" class="delete-btn">Delete</button>
+                                            <button onclick="deleteRecord('<?php echo $record['booth_id']; ?>', '<?php echo htmlspecialchars($record['polling_station_no']); ?>')" class="delete-btn">Delete</button>
                                         <?php endif; ?>
                                     </td>
                                 </tr>
