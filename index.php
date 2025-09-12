@@ -141,14 +141,12 @@ $states = $mpMaster->getStates();
                (<?php echo implode(', ', $currentUser['roles']); ?>)</p>
         </div>
         
-        <!-- Breadcrumb Navigation -->
-        <nav class="breadcrumb">
-            <a href="index.php" class="breadcrumb-item active">📊 MP Master</a>
-            <span class="breadcrumb-separator">→</span>
-            <a href="mla_index.php" class="breadcrumb-item">🏛️ MLA Master</a>
-            <span class="breadcrumb-separator">→</span>
-            <a href="booth_index.php" class="breadcrumb-item">🏛️ Booth Master</a>
-        </nav>
+        <!-- Dynamic Breadcrumb Navigation -->
+        <?php 
+        require_once 'dynamic_breadcrumb.php';
+        $dynamicBreadcrumb = new DynamicBreadcrumb($pdo);
+        echo $dynamicBreadcrumb->getBreadcrumbForPage('index.php');
+        ?>
         
         <?php if ($message): ?>
             <div class="message <?php echo $messageType; ?>">
@@ -239,6 +237,7 @@ $states = $mpMaster->getStates();
                                     <td><?php echo htmlspecialchars($record['updated_by'] ?? 'N/A'); ?></td>
                                     <td><?php echo date('Y-m-d', strtotime($record['created_at'])); ?></td>
                                     <td class="actions">
+                                        <a href="mp_detail.php?mp_id=<?php echo $record['mp_id']; ?>" class="btn btn-primary">View MLAs</a>
                                         <?php if ($auth->hasPermission('mp', 'update')): ?>
                                             <button onclick="editRecord('<?php echo $record['mp_id']; ?>')" class="edit-btn">Edit</button>
                                         <?php endif; ?>

@@ -251,15 +251,10 @@ if (isset($_GET['action']) && $_GET['action'] === 'download_template') {
         <a href="mla_index.php" class="back-link">← Back to MLA Master Management</a>
         
         <!-- Breadcrumb Navigation -->
-        <nav class="breadcrumb">
-            <a href="index.php" class="breadcrumb-item">📊 MP Master</a>
-            <span class="breadcrumb-separator">→</span>
-            <a href="mla_index.php" class="breadcrumb-item">🏛️ MLA Master</a>
-            <span class="breadcrumb-separator">→</span>
-            <a href="booth_index.php" class="breadcrumb-item">🏛️ Booth Master</a>
-            <span class="breadcrumb-separator">→</span>
-            <span class="breadcrumb-item active">📤 Upload MLA Data</span>
-        </nav>
+        <?php 
+        require_once 'breadcrumb_helper.php';
+        echo BreadcrumbHelper::getBreadcrumbForPage('mla_upload.php');
+        ?>
         
         <h1>Upload MLA Data from Excel</h1>
         

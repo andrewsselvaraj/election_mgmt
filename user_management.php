@@ -86,6 +86,12 @@ $currentUser = $auth->getCurrentUser();
                (<?php echo implode(', ', $currentUser['roles']); ?>)</p>
         </div>
         
+        <!-- Breadcrumb Navigation -->
+        <?php 
+        require_once 'breadcrumb_helper.php';
+        echo BreadcrumbHelper::getBreadcrumbForPage('user_management.php');
+        ?>
+        
         <?php if ($message): ?>
             <div class="message <?php echo $messageType; ?>">
                 <?php echo htmlspecialchars($message); ?>

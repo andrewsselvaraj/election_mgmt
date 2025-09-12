@@ -122,7 +122,7 @@ $mlaRecords = $boothMaster->getMLARecords();
 $stats = $boothMaster->getStats();
 
 // Get polling station types
-$stationTypes = $boothMaster->getPollingStationTypes();
+$stationTypes = $boothMaster->getCommonStationTypes();
 ?>
 
 <!DOCTYPE html>
@@ -153,14 +153,12 @@ $stationTypes = $boothMaster->getPollingStationTypes();
                (<?php echo implode(', ', $currentUser['roles']); ?>)</p>
         </div>
         
-        <!-- Breadcrumb Navigation -->
-        <nav class="breadcrumb">
-            <a href="index.php" class="breadcrumb-item">📊 MP Master</a>
-            <span class="breadcrumb-separator">→</span>
-            <a href="mla_index.php" class="breadcrumb-item">🏛️ MLA Master</a>
-            <span class="breadcrumb-separator">→</span>
-            <a href="booth_index.php" class="breadcrumb-item active">🏛️ Booth Master</a>
-        </nav>
+        <!-- Dynamic Breadcrumb Navigation -->
+        <?php 
+        require_once 'dynamic_breadcrumb.php';
+        $dynamicBreadcrumb = new DynamicBreadcrumb($pdo);
+        echo $dynamicBreadcrumb->getBreadcrumbForPage('booth_index.php');
+        ?>
         
         <!-- Statistics -->
         <div class="stats-container">
@@ -232,11 +230,15 @@ $stationTypes = $boothMaster->getPollingStationTypes();
                 
                 <div class="form-group">
                     <label for="polling_station_type">Polling Station Type:</label>
-                    <select id="polling_station_type" name="polling_station_type" required>
+                    <input type="text" id="polling_station_type" name="polling_station_type" 
+                           list="station_types_list" placeholder="Enter or select station type" 
+                           value="Regular" required>
+                    <datalist id="station_types_list">
                         <?php foreach ($stationTypes as $value => $label): ?>
-                            <option value="<?php echo $value; ?>"><?php echo $label; ?></option>
+                            <option value="<?php echo htmlspecialchars($value); ?>">
                         <?php endforeach; ?>
-                    </select>
+                    </datalist>
+                    <small class="form-text text-muted">Type any station type or select from suggestions</small>
                 </div>
                 
                 <div class="form-actions">
@@ -298,6 +300,7 @@ $stationTypes = $boothMaster->getPollingStationTypes();
                                     <td><?php echo htmlspecialchars($record['created_by']); ?></td>
                                     <td><?php echo date('Y-m-d', strtotime($record['created_datetime'])); ?></td>
                                     <td class="actions">
+                                        <a href="booth_detail.php?mp_id=<?php echo $record['mp_id']; ?>&mla_id=<?php echo $record['mla_id']; ?>&booth_id=<?php echo $record['booth_id']; ?>" class="btn btn-primary">View Details</a>
                                         <?php if ($auth->hasPermission('booth', 'update')): ?>
                                             <button onclick="editRecord('<?php echo $record['booth_id']; ?>')" class="edit-btn">Edit</button>
                                         <?php endif; ?>

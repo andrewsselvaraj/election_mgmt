@@ -1,7 +1,9 @@
 <?php
 require_once 'config.php';
 require_once 'BoothExcelProcessor.php';
+require_once 'ContextualBoothProcessor.php';
 require_once 'Auth.php';
+require_once 'dynamic_breadcrumb.php';
 
 $auth = new Auth($pdo);
 $auth->requireLogin();
@@ -15,14 +17,42 @@ $currentUser = $auth->getCurrentUser();
 $message = '';
 $messageType = '';
 
-// Handle template download
-if (isset($_GET['download_template'])) {
-    $processor = new BoothExcelProcessor($pdo);
-    $processor->downloadTemplate();
+// Get context from URL parameters
+$mpId = $_GET['mp_id'] ?? null;
+$mlaId = $_GET['mla_id'] ?? null;
+
+// Validate context
+if (!$mpId || !$mlaId) {
+    $message = 'Invalid context. Please navigate from MP → MLA to upload booth data.';
+    $messageType = 'error';
+} else {
+    // Verify MP and MLA exist and are related
+    try {
+        $mpSql = "SELECT * FROM mp_master WHERE mp_id = :mp_id";
+        $mpStmt = $pdo->prepare($mpSql);
+        $mpStmt->bindParam(':mp_id', $mpId);
+        $mpStmt->execute();
+        $mpData = $mpStmt->fetch();
+        
+        $mlaSql = "SELECT * FROM mla_master WHERE mla_id = :mla_id AND mp_id = :mp_id";
+        $mlaStmt = $pdo->prepare($mlaSql);
+        $mlaStmt->bindParam(':mla_id', $mlaId);
+        $mlaStmt->bindParam(':mp_id', $mpId);
+        $mlaStmt->execute();
+        $mlaData = $mlaStmt->fetch();
+        
+        if (!$mpData || !$mlaData) {
+            $message = 'Invalid MP or MLA context. Please navigate properly.';
+            $messageType = 'error';
+        }
+    } catch (Exception $e) {
+        $message = 'Error validating context: ' . $e->getMessage();
+        $messageType = 'error';
+    }
 }
 
 // Handle file upload
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['excel_file'])) {
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['excel_file']) && $mpData && $mlaData) {
     $uploadDir = 'uploads/';
     
     // Create upload directory if it doesn't exist
@@ -56,7 +86,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['excel_file'])) {
             
             if (move_uploaded_file($fileTmpName, $filePath)) {
                 try {
-                    $processor = new BoothExcelProcessor($pdo);
+                    // Create contextual processor
+                    $processor = new ContextualBoothProcessor($pdo, $mlaId);
                     $result = $processor->processExcelFile($filePath, $currentUser['first_name'] . ' ' . $currentUser['last_name']);
                     
                     if ($result['success']) {
@@ -89,6 +120,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['excel_file'])) {
         }
     }
 }
+
+$dynamicBreadcrumb = new DynamicBreadcrumb($pdo);
+
+// Handle template download
+if (isset($_GET['download_template']) && $mpData && $mlaData) {
+    $processor = new ContextualBoothProcessor($pdo, $mlaId);
+    $processor->downloadTemplate();
+}
 ?>
 
 <!DOCTYPE html>
@@ -96,7 +135,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['excel_file'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload Booth Data</title>
+    <title>Upload Booth Data - <?php echo htmlspecialchars($mlaData['mla_constituency_name'] ?? 'Unknown'); ?></title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -104,9 +143,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['excel_file'])) {
         <div class="header-section">
             <h1>📤 Upload Booth Data</h1>
             <div class="header-actions">
-                <a href="booth_index.php" class="btn btn-secondary">🏛️ Booth Master</a>
-                <a href="index.php" class="btn btn-secondary">📊 MP Master</a>
-                <a href="mla_index.php" class="btn btn-secondary">🏛️ MLA Master</a>
+                <a href="mla_detail.php?mp_id=<?php echo $mpId; ?>&mla_id=<?php echo $mlaId; ?>" class="btn btn-secondary">← Back to MLA</a>
+                <a href="mp_detail.php?mp_id=<?php echo $mpId; ?>" class="btn btn-secondary">← Back to MP</a>
+                <a href="index.php" class="btn btn-secondary">📊 All MPs</a>
                 <a href="logout.php" class="btn btn-danger">🚪 Logout</a>
             </div>
         </div>
@@ -116,11 +155,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['excel_file'])) {
                (<?php echo implode(', ', $currentUser['roles']); ?>)</p>
         </div>
         
-        <!-- Breadcrumb Navigation -->
-        <?php 
-        require_once 'breadcrumb_helper.php';
-        echo BreadcrumbHelper::getBreadcrumbForPage('booth_upload.php');
-        ?>
+        <!-- Dynamic Breadcrumb Navigation -->
+        <?php echo $dynamicBreadcrumb->getBreadcrumbForPage('contextual_booth_upload.php', ['mp_id' => $mpId, 'mla_id' => $mlaId]); ?>
         
         <?php if ($message): ?>
             <div class="message <?php echo $messageType; ?>">
@@ -128,107 +164,114 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['excel_file'])) {
             </div>
         <?php endif; ?>
         
-        <div class="upload-container">
-            <div class="upload-info">
-                <h2>📋 Upload Instructions</h2>
-                <div class="instructions">
-                    <h3>Required Columns:</h3>
-                    <ul>
-                        <li><strong>mla_constituency_code</strong> - MLA constituency code (must exist in MLA Master)</li>
-                        <li><strong>sl_no</strong> - Serial number (integer)</li>
-                        <li><strong>polling_station_no</strong> - Polling station number (unique within MLA constituency)</li>
-                        <li><strong>location_name_of_buiding</strong> - Location name of building</li>
-                    </ul>
-                    
-                    <h3>Optional Columns:</h3>
-                    <ul>
-                        <li><strong>polling_areas</strong> - Description of polling areas</li>
-                        <li><strong>polling_station_type</strong> - Type: Regular, Auxiliary, Special, Mobile (default: Regular)</li>
-                    </ul>
-                    
-                    <h3>File Requirements:</h3>
-                    <ul>
-                        <li>File format: CSV, XLS, or XLSX</li>
-                        <li>Maximum file size: 5MB</li>
-                        <li>First row should contain column headers</li>
-                        <li>MLA constituency codes must exist in MLA Master table</li>
-                    </ul>
-                </div>
-                
-                <div class="template-section">
-                    <h3>📥 Download Template</h3>
-                    <p>Download a sample CSV template to see the correct format:</p>
-                    <a href="?download_template=1" class="btn btn-primary">Download Template</a>
+        <?php if ($mpData && $mlaData): ?>
+            <!-- Context Information -->
+            <div class="context-info">
+                <h2>📋 Upload Context</h2>
+                <div class="context-details">
+                    <p><strong>MP Constituency:</strong> <?php echo htmlspecialchars($mpData['mp_constituency_name']); ?> (<?php echo htmlspecialchars($mpData['state']); ?>)</p>
+                    <p><strong>MLA Constituency:</strong> <?php echo htmlspecialchars($mlaData['mla_constituency_name']); ?></p>
+                    <p><strong>Uploading to:</strong> This MLA constituency only</p>
                 </div>
             </div>
             
-            <div class="upload-form-container">
-                <h2>📤 Upload File</h2>
-                <form method="POST" enctype="multipart/form-data" class="upload-form">
-                    <div class="form-group">
-                        <label for="excel_file">Select File:</label>
-                        <input type="file" id="excel_file" name="excel_file" accept=".csv,.xlsx,.xls" required>
-                        <small>Supported formats: CSV, XLS, XLSX (Max 5MB)</small>
+            <div class="upload-container">
+                <div class="upload-info">
+                    <h2>📋 Upload Instructions</h2>
+                    <div class="instructions">
+                        <h3>Required Columns (Simplified):</h3>
+                        <ul>
+                            <li><strong>sl_no</strong> - Serial number (integer)</li>
+                            <li><strong>polling_station_no</strong> - Polling station number (unique within this MLA)</li>
+                            <li><strong>location_name_of_building</strong> - Location name of building</li>
+                        </ul>
+                        
+                        <h3>Optional Columns:</h3>
+                        <ul>
+                            <li><strong>polling_areas</strong> - Description of polling areas</li>
+                            <li><strong>polling_station_type</strong> - Type: Regular, Auxiliary, Special, Mobile (default: Regular)</li>
+                        </ul>
+                        
+                        <h3>File Requirements:</h3>
+                        <ul>
+                            <li>File format: CSV, XLS, or XLSX</li>
+                            <li>Maximum file size: 5MB</li>
+                            <li>First row should contain column headers</li>
+                            <li><strong>No need to include MP or MLA information - it's automatically set from context!</strong></li>
+                        </ul>
                     </div>
                     
-                    <div class="form-actions">
-                        <button type="submit" class="btn btn-primary">Upload File</button>
-                        <button type="button" onclick="clearForm()" class="btn btn-secondary">Clear</button>
+                    <div class="template-section">
+                        <h3>📥 Download Template</h3>
+                        <p>Download a sample CSV template for this MLA constituency:</p>
+                        <a href="?download_template=1&mp_id=<?php echo $mpId; ?>&mla_id=<?php echo $mlaId; ?>" class="btn btn-primary">Download Template</a>
                     </div>
-                </form>
+                </div>
                 
-                <div class="upload-progress" id="upload-progress" style="display: none;">
-                    <div class="progress-bar">
-                        <div class="progress-fill"></div>
+                <div class="upload-form-container">
+                    <h2>📤 Upload File</h2>
+                    <form method="POST" enctype="multipart/form-data" class="upload-form">
+                        <div class="form-group">
+                            <label for="excel_file">Select File:</label>
+                            <input type="file" id="excel_file" name="excel_file" accept=".csv,.xlsx,.xls" required>
+                            <small>Supported formats: CSV, XLS, XLSX (Max 5MB)</small>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Upload File</button>
+                            <button type="button" onclick="clearForm()" class="btn btn-secondary">Clear</button>
+                        </div>
+                    </form>
+                    
+                    <div class="upload-progress" id="upload-progress" style="display: none;">
+                        <div class="progress-bar">
+                            <div class="progress-fill"></div>
+                        </div>
+                        <p>Uploading and processing file...</p>
                     </div>
-                    <p>Uploading and processing file...</p>
                 </div>
             </div>
-        </div>
-        
-        <div class="sample-data">
-            <h3>📋 Sample Data Format</h3>
-            <div class="sample-table">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>mla_constituency_code</th>
-                            <th>sl_no</th>
-                            <th>polling_station_no</th>
-                            <th>location_name_of_buiding</th>
-                            <th>polling_areas</th>
-                            <th>polling_station_type</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>1</td>
-                            <td>1</td>
-                            <td>001</td>
-                            <td>Government School Building</td>
-                            <td>Area 1-5</td>
-                            <td>Regular</td>
-                        </tr>
-                        <tr>
-                            <td>1</td>
-                            <td>2</td>
-                            <td>002</td>
-                            <td>Community Hall</td>
-                            <td>Area 6-10</td>
-                            <td>Regular</td>
-                        </tr>
-                        <tr>
-                            <td>2</td>
-                            <td>1</td>
-                            <td>001</td>
-                            <td>Primary School</td>
-                            <td>Area 1-3</td>
-                            <td>Auxiliary</td>
-                        </tr>
-                    </tbody>
-                </table>
+            
+            <div class="sample-data">
+                <h3>📋 Sample Data Format</h3>
+                <div class="sample-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>sl_no</th>
+                                <th>polling_station_no</th>
+                                <th>location_name_of_building</th>
+                                <th>polling_areas</th>
+                                <th>polling_station_type</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>001</td>
+                                <td>Government School Building</td>
+                                <td>Area 1-5</td>
+                                <td>Regular</td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>002</td>
+                                <td>Community Hall</td>
+                                <td>Area 6-10</td>
+                                <td>Regular</td>
+                            </tr>
+                            <tr>
+                                <td>3</td>
+                                <td>003</td>
+                                <td>Primary School</td>
+                                <td>Area 11-15</td>
+                                <td>Auxiliary</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </div>
+        <?php endif; ?>
     </div>
     
     <script>
@@ -281,6 +324,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['excel_file'])) {
     </script>
     
     <style>
+        .context-info {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 5px solid #2196f3;
+        }
+        
+        .context-details p {
+            margin: 8px 0;
+            font-size: 16px;
+        }
+        
         .upload-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -319,7 +375,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['excel_file'])) {
         .template-section {
             margin-top: 20px;
             padding: 15px;
-            background: #e3f2fd;
+            background: #e8f5e8;
             border-radius: 6px;
         }
         

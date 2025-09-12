@@ -1,14 +1,13 @@
 <?php
 require_once 'config.php';
-require_once 'BoothMaster.php';
 
-class BoothExcelProcessor {
+class ContextualBoothProcessor {
     private $pdo;
-    private $boothMaster;
+    private $mlaId;
     
-    public function __construct($pdo) {
+    public function __construct($pdo, $mlaId) {
         $this->pdo = $pdo;
-        $this->boothMaster = new BoothMaster($pdo);
+        $this->mlaId = $mlaId;
     }
     
     public function processExcelFile($filePath, $createdBy) {
@@ -46,13 +45,13 @@ class BoothExcelProcessor {
                     $data = $this->mapRowData($header, $row, $createdBy);
                     
                     // Check if polling station already exists
-                    if ($this->boothMaster->stationExists($data['mla_id'], $data['Polling_station_No'])) {
-                        $errors[] = "Row $rowNumber: Polling station '{$data['Polling_station_No']}' already exists in this MLA constituency";
+                    if ($this->stationExists($data['polling_station_no'])) {
+                        $errors[] = "Row $rowNumber: Polling station '{$data['polling_station_no']}' already exists in this MLA constituency";
                         $errorCount++;
                         continue;
                     }
                     
-                    if ($this->boothMaster->create($data)) {
+                    if ($this->createBooth($data)) {
                         $successCount++;
                     } else {
                         $errors[] = "Row $rowNumber: Failed to create booth record";
@@ -82,7 +81,7 @@ class BoothExcelProcessor {
         }
     }
     
-    private function validateFile($filePath) {
+    public function validateFile($filePath) {
         if (!file_exists($filePath)) {
             return ['valid' => false, 'message' => 'File does not exist'];
         }
@@ -106,7 +105,6 @@ class BoothExcelProcessor {
         
         // Define column mappings for flexible matching
         $columnMappings = [
-            'mla_constituency_code' => ['mla_constituency_code', 'mla_code', 'mla id', 'mla_id', 'assembly_code'],
             'sl_no' => ['sl_no', 'sl no', 'serial_no', 'serial no', 'serial_number', 'serial number'],
             'polling_station_no' => ['polling_station_no', 'polling station no', 'station_no', 'station no', 'booth_no', 'booth no'],
             'location_name_of_building' => ['location_name_of_building', 'location', 'building', 'location_name', 'location name', 'building_name', 'building name'],
@@ -114,7 +112,7 @@ class BoothExcelProcessor {
             'polling_station_type' => ['polling_station_type', 'polling station type', 'station_type', 'station type', 'type', 'booth_type', 'booth type']
         ];
         
-        $requiredColumns = ['mla_constituency_code', 'sl_no', 'polling_station_no', 'location_name_of_building'];
+        $requiredColumns = ['sl_no', 'polling_station_no', 'location_name_of_building'];
         $missingColumns = [];
         
         foreach ($requiredColumns as $required) {
@@ -150,23 +148,8 @@ class BoothExcelProcessor {
         
         $data = [];
         
-        // Map MLA constituency code to MLA ID
-        $mlaCodeIndex = $this->findColumnIndex($cleanHeader, ['mla_constituency_code', 'mla_code', 'mla id', 'mla_id', 'assembly_code']);
-        if ($mlaCodeIndex === false) {
-            throw new Exception('MLA constituency code column not found');
-        }
-        
-        $mlaCode = trim($row[$mlaCodeIndex]);
-        if (empty($mlaCode)) {
-            throw new Exception('MLA constituency code is required');
-        }
-        
-        // Get MLA ID from code
-        $mlaId = $this->getMLAIdByCode($mlaCode);
-        if (!$mlaId) {
-            throw new Exception("MLA constituency with code '$mlaCode' not found");
-        }
-        $data['mla_id'] = $mlaId;
+        // Set MLA ID from context
+        $data['mla_id'] = $this->mlaId;
         
         // Map serial number
         $slNoIndex = $this->findColumnIndex($cleanHeader, ['sl_no', 'sl no', 'serial_no', 'serial no', 'serial_number', 'serial number']);
@@ -217,26 +200,47 @@ class BoothExcelProcessor {
         return false;
     }
     
-    private function getMLAIdByCode($mlaCode) {
+    private function stationExists($stationNo) {
         try {
-            $sql = "SELECT mla_id FROM MLA_Master WHERE mla_constituency_code = :code";
+            $sql = "SELECT COUNT(*) FROM booth_master 
+                    WHERE mla_id = :mla_id AND polling_station_no = :station_no AND status = 'ACTIVE'";
             $stmt = $this->pdo->prepare($sql);
-            $stmt->bindParam(':code', $mlaCode);
+            $stmt->bindParam(':mla_id', $this->mlaId);
+            $stmt->bindParam(':station_no', $stationNo);
             $stmt->execute();
-            $result = $stmt->fetch();
-            return $result ? $result['mla_id'] : null;
+            return $stmt->fetchColumn() > 0;
         } catch (PDOException $e) {
-            return null;
+            return false;
+        }
+    }
+    
+    private function createBooth($data) {
+        try {
+            $sql = "INSERT INTO booth_master (mla_id, sl_no, polling_station_no, location_name_of_building, 
+                    polling_areas, polling_station_type, created_by) 
+                    VALUES (:mla_id, :sl_no, :station_no, :location, :areas, :type, :created_by)";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->bindParam(':mla_id', $data['mla_id']);
+            $stmt->bindParam(':sl_no', $data['sl_no']);
+            $stmt->bindParam(':station_no', $data['polling_station_no']);
+            $stmt->bindParam(':location', $data['location_name_of_building']);
+            $stmt->bindParam(':areas', $data['polling_areas']);
+            $stmt->bindParam(':type', $data['polling_station_type']);
+            $stmt->bindParam(':created_by', $data['created_by']);
+            
+            return $stmt->execute();
+        } catch(PDOException $e) {
+            throw new Exception("Error creating booth record: " . $e->getMessage());
         }
     }
     
     public function generateTemplate() {
-        $template = "mla_constituency_code,sl_no,polling_station_no,location_name_of_buiding,polling_areas,polling_station_type\n";
-        $template .= "1,1,001,Government School Building,Area 1-5,Regular\n";
-        $template .= "1,2,002,Community Hall,Area 6-10,Regular\n";
-        $template .= "2,1,001,Primary School,Area 1-3,Auxiliary\n";
-        $template .= "2,2,002,High School,Area 4-6,Regular\n";
-        $template .= "3,1,001,Panchayat Office,Area 1-4,Special\n";
+        $template = "sl_no,polling_station_no,location_name_of_building,polling_areas,polling_station_type\n";
+        $template .= "1,001,Government School Building,Area 1-5,Regular\n";
+        $template .= "2,002,Community Hall,Area 6-10,Regular\n";
+        $template .= "3,003,Primary School,Area 11-15,Auxiliary\n";
+        $template .= "4,004,High School,Area 16-20,Special\n";
+        $template .= "5,005,Panchayat Office,Area 21-25,Mobile\n";
         
         return $template;
     }
@@ -245,7 +249,7 @@ class BoothExcelProcessor {
         $template = $this->generateTemplate();
         
         header('Content-Type: text/csv');
-        header('Content-Disposition: attachment; filename="booth_template.csv"');
+        header('Content-Disposition: attachment; filename="booth_template_' . $this->mlaId . '.csv"');
         header('Cache-Control: no-cache, must-revalidate');
         header('Expires: Sat, 26 Jul 1997 05:00:00 GMT');
         

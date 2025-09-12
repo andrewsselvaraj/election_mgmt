@@ -144,14 +144,12 @@ $stats = $mlaMaster->getStats();
                (<?php echo implode(', ', $currentUser['roles']); ?>)</p>
         </div>
         
-        <!-- Breadcrumb Navigation -->
-        <nav class="breadcrumb">
-            <a href="index.php" class="breadcrumb-item">📊 MP Master</a>
-            <span class="breadcrumb-separator">→</span>
-            <a href="mla_index.php" class="breadcrumb-item active">🏛️ MLA Master</a>
-            <span class="breadcrumb-separator">→</span>
-            <a href="booth_index.php" class="breadcrumb-item">🏛️ Booth Master</a>
-        </nav>
+        <!-- Dynamic Breadcrumb Navigation -->
+        <?php 
+        require_once 'dynamic_breadcrumb.php';
+        $dynamicBreadcrumb = new DynamicBreadcrumb($pdo);
+        echo $dynamicBreadcrumb->getBreadcrumbForPage('mla_index.php');
+        ?>
         
         <!-- Statistics -->
         <div class="stats-container">
@@ -260,6 +258,7 @@ $stats = $mlaMaster->getStats();
                                     <td><?php echo htmlspecialchars($record['updated_by'] ?? 'N/A'); ?></td>
                                     <td><?php echo date('Y-m-d', strtotime($record['created_at'])); ?></td>
                                     <td class="actions">
+                                        <a href="mla_detail.php?mp_id=<?php echo $record['mp_id']; ?>&mla_id=<?php echo $record['mla_id']; ?>" class="btn btn-primary">View Booths</a>
                                         <button onclick="editRecord('<?php echo $record['mla_id']; ?>')" class="edit-btn">Edit</button>
                                         <button onclick="deleteRecord('<?php echo $record['mla_id']; ?>', '<?php echo htmlspecialchars($record['mla_constituency_name']); ?>')" class="delete-btn">Delete</button>
                                     </td>

@@ -1,0 +1,11 @@
+Serial_Number,Station_Number,Building_Location,Polling_Areas_Description,Station_Type
+1,PS001,Government Primary School,Areas 1-5,Regular
+2,PS002,Community Hall,Areas 6-10,Auxiliary
+3,PS003,High School Building,Areas 11-15,Special
+4,PS004,Panchayat Office,Areas 16-20,Mobile
+5,PS005,Private School,Areas 21-25,Regular
+6,PS006,Religious Institution,Areas 26-30,Temporary
+7,PS007,Government Hospital,Areas 31-35,Emergency
+8,PS008,College Campus,Areas 36-40,Regular
+9,PS009,Market Complex,Areas 41-45,Urban
+10,PS010,Village Center,Areas 46-50,Rural

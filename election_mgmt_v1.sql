@@ -106,7 +106,7 @@ CREATE TABLE Booth_master (
     Polling_station_No VARCHAR(50) NOT NULL COMMENT 'Polling Station Number',
     Location_name_of_buiding VARCHAR(255) NOT NULL COMMENT 'Location name of building',
     Polling_Areas TEXT COMMENT 'Polling Areas description',
-    Polling_Station_Type ENUM('Regular', 'Auxiliary', 'Special', 'Mobile') DEFAULT 'Regular' COMMENT 'Type of polling station',
+    Polling_Station_Type VARCHAR(255) DEFAULT 'Regular' COMMENT 'Type of polling station',
     
     -- Audit fields
     created_by VARCHAR(100) DEFAULT 'SYSTEM' COMMENT 'User who created the record',

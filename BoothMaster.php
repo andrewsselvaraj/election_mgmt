@@ -206,12 +206,35 @@ class BoothMaster {
     
     // Get polling station types
     public function getPollingStationTypes() {
+        // Common polling station types (suggestions for dropdown)
         return [
             'Regular' => 'Regular',
             'Auxiliary' => 'Auxiliary', 
             'Special' => 'Special',
-            'Mobile' => 'Mobile'
+            'Mobile' => 'Mobile',
+            'Temporary' => 'Temporary',
+            'Emergency' => 'Emergency',
+            'Remote' => 'Remote',
+            'Urban' => 'Urban',
+            'Rural' => 'Rural'
         ];
+    }
+    
+    public function getCommonStationTypes() {
+        // Get commonly used station types from database
+        try {
+            $stmt = $this->pdo->query("SELECT DISTINCT polling_station_type FROM booth_master WHERE polling_station_type IS NOT NULL AND polling_station_type != '' ORDER BY polling_station_type");
+            $types = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            
+            // Add common types if not in database
+            $commonTypes = ['Regular', 'Auxiliary', 'Special', 'Mobile'];
+            $allTypes = array_unique(array_merge($commonTypes, $types));
+            
+            return array_combine($allTypes, $allTypes);
+        } catch (PDOException $e) {
+            // Fallback to default types
+            return $this->getPollingStationTypes();
+        }
     }
 }
 ?>
