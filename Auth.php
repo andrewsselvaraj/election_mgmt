@@ -96,9 +96,16 @@ class Auth {
             return true;
         }
         
-        // Check specific permission
-        if (isset($permissions[$module]) && in_array($action, $permissions[$module])) {
-            return true;
+        // Check specific permission - handle both old array format and new boolean format
+        if (isset($permissions[$module])) {
+            // New boolean format
+            if (is_array($permissions[$module]) && isset($permissions[$module][$action])) {
+                return $permissions[$module][$action] === true;
+            }
+            // Old array format (for backward compatibility)
+            if (is_array($permissions[$module]) && in_array($action, $permissions[$module])) {
+                return true;
+            }
         }
         
         return false;

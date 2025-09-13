@@ -1,0 +1,11 @@
+voter_id,mla_id,voter_name,father_name,mother_name,husband_name,age,gender,address,phone,email,booth_id,ward_no,part_no
+V001,1,Rajesh Kumar,Shyam Kumar,Kamala Devi,,45,Male,123 Gandhi Nagar,Delhi,9876543210,rajesh@example.com,BOOTH001,W001,P001
+V002,1,Priya Sharma,Ram Sharma,Sita Sharma,Vikram Sharma,38,Female,456 Nehru Street,Delhi,9876543211,priya@example.com,BOOTH001,W001,P001
+V003,1,Amit Singh,Harish Singh,Sunita Singh,,29,Male,789 Patel Road,Delhi,9876543212,amit@example.com,BOOTH002,W001,P002
+V004,1,Sunita Devi,Rajesh Devi,Kamla Devi,Mahesh Kumar,42,Female,321 Tagore Lane,Delhi,9876543213,sunita@example.com,BOOTH002,W002,P001
+V005,1,Arjun Reddy,Suresh Reddy,Lakshmi Reddy,,33,Male,654 Indira Colony,Delhi,9876543214,arjun@example.com,BOOTH003,W002,P002
+V006,1,Meera Joshi,Vinod Joshi,Radha Joshi,Sanjay Joshi,36,Female,987 Laxmi Nagar,Delhi,9876543215,meera@example.com,BOOTH003,W003,P001
+V007,1,Ravi Verma,Om Prakash,Shanti Devi,,41,Male,147 Krishna Vihar,Delhi,9876543216,ravi@example.com,BOOTH004,W003,P002
+V008,1,Kavita Gupta,Ramesh Gupta,Usha Gupta,Anil Gupta,39,Female,258 Saraswati Enclave,Delhi,9876543217,kavita@example.com,BOOTH004,W004,P001
+V009,1,Suresh Tiwari,Bhagwan Tiwari,Gayatri Devi,,31,Male,369 Hanuman Chowk,Delhi,9876543218,suresh@example.com,BOOTH005,W004,P002
+V010,1,Anita Pandey,Krishna Pandey,Sushila Devi,Rajesh Pandey,44,Female,741 Ganesh Nagar,Delhi,9876543219,anita@example.com,BOOTH005,W005,P001

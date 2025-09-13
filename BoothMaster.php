@@ -12,8 +12,8 @@ class BoothMaster {
     public function create($data) {
         try {
             $sql = "INSERT INTO booth_master (mla_id, sl_no, polling_station_no, location_name_of_building, 
-                    polling_areas, polling_station_type, created_by) 
-                    VALUES (:mla_id, :sl_no, :station_no, :location, :areas, :type, :created_by)";
+                    polling_areas, polling_station_type, notes, created_by) 
+                    VALUES (:mla_id, :sl_no, :station_no, :location, :areas, :type, :notes, :created_by)";
             $stmt = $this->pdo->prepare($sql);
             $stmt->bindParam(':mla_id', $data['mla_id']);
             $stmt->bindParam(':sl_no', $data['sl_no']);
@@ -21,23 +21,40 @@ class BoothMaster {
             $stmt->bindParam(':location', $data['location_name_of_building']);
             $stmt->bindParam(':areas', $data['polling_areas']);
             $stmt->bindParam(':type', $data['polling_station_type']);
+            $stmt->bindValue(':notes', $data['notes'] ?? null, PDO::PARAM_STR);
             $stmt->bindParam(':created_by', $data['created_by']);
             
-            return $stmt->execute();
+            $result = $stmt->execute();
+            
+            if ($result) {
+                return [
+                    'success' => true,
+                    'message' => 'Booth record created successfully',
+                    'booth_id' => $this->pdo->lastInsertId()
+                ];
+            } else {
+                return [
+                    'success' => false,
+                    'message' => 'Failed to create booth record'
+                ];
+            }
         } catch(PDOException $e) {
-            throw new Exception("Error creating booth record: " . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => 'Error creating booth record: ' . $e->getMessage()
+            ];
         }
     }
     
     // Read all Booth records with MLA and MP details
     public function readAll() {
         try {
-            $sql = "SELECT b.*, mla.mla_constituency_name, mp.mp_constituency_name, mp.state 
+            $sql = "SELECT b.*, mla.mla_constituency_name, mp.mp_id, mp.mp_constituency_name, mp.state 
                     FROM booth_master b 
                     JOIN mla_master mla ON b.mla_id = mla.mla_id 
                     JOIN mp_master mp ON mla.mp_id = mp.mp_id 
                     WHERE b.status = 'ACTIVE'
-                    ORDER BY mp.mp_constituency_name, mla.mla_constituency_name, b.sl_no";
+                    ORDER BY mp.mp_constituency_code, mla.mla_constituency_code, b.sl_no";
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute();
             return $stmt->fetchAll();
@@ -49,7 +66,7 @@ class BoothMaster {
     // Read a single Booth record by ID
     public function readById($id) {
         try {
-            $sql = "SELECT b.*, mla.mla_constituency_name, mp.mp_constituency_name, mp.state 
+            $sql = "SELECT b.*, mla.mla_constituency_name, mp.mp_id, mp.mp_constituency_name, mp.state 
                     FROM booth_master b 
                     JOIN mla_master mla ON b.mla_id = mla.mla_id 
                     JOIN mp_master mp ON mla.mp_id = mp.mp_id 
@@ -73,6 +90,7 @@ class BoothMaster {
                     location_name_of_building = :location,
                     polling_areas = :areas,
                     polling_station_type = :type,
+                    notes = :notes,
                     updated_by = :updated_by,
                     updated_datetime = CURRENT_TIMESTAMP
                     WHERE booth_id = :id";
@@ -83,6 +101,7 @@ class BoothMaster {
             $stmt->bindParam(':location', $data['location_name_of_building']);
             $stmt->bindParam(':areas', $data['polling_areas']);
             $stmt->bindParam(':type', $data['polling_station_type']);
+            $stmt->bindValue(':notes', $data['notes'] ?? null, PDO::PARAM_STR);
             $stmt->bindParam(':updated_by', $data['updated_by']);
             $stmt->bindParam(':id', $id);
             
@@ -122,7 +141,7 @@ class BoothMaster {
                         OR mp.mp_constituency_name LIKE :search
                         OR mp.state LIKE :search
                     )
-                    ORDER BY mp.mp_constituency_name, mla.mla_constituency_name, b.sl_no";
+                    ORDER BY mp.mp_constituency_code, mla.mla_constituency_code, b.sl_no";
             $stmt = $this->pdo->prepare($sql);
             $searchPattern = "%$searchTerm%";
             $stmt->bindParam(':search', $searchPattern);
@@ -154,7 +173,7 @@ class BoothMaster {
             $sql = "SELECT mla.mla_id, mla.mla_constituency_name, mp.mp_constituency_name, mp.state 
                     FROM mla_master mla 
                     JOIN mp_master mp ON mla.mp_id = mp.mp_id 
-                    ORDER BY mp.mp_constituency_name, mla.mla_constituency_name";
+                    ORDER BY mp.mp_constituency_code, mla.mla_constituency_code";
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute();
             return $stmt->fetchAll();
@@ -235,6 +254,38 @@ class BoothMaster {
             // Fallback to default types
             return $this->getPollingStationTypes();
         }
+    }
+    
+    
+    // Get statistics for Booth records
+    public function getStatistics() {
+        try {
+            $stats = [];
+            
+            // Total booths
+            $sql = "SELECT COUNT(*) as total FROM booth_master WHERE status = 'ACTIVE'";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute();
+            $stats['total_booths'] = $stmt->fetchColumn();
+            
+            // Active records
+            $stats['active_records'] = $stats['total_booths'];
+            
+            // Total MLA constituencies
+            $sql = "SELECT COUNT(DISTINCT mla_id) as total FROM booth_master WHERE status = 'ACTIVE'";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute();
+            $stats['total_mla_constituencies'] = $stmt->fetchColumn();
+            
+            return $stats;
+        } catch(PDOException $e) {
+            throw new Exception("Error getting statistics: " . $e->getMessage());
+        }
+    }
+    
+    // Read all booth records with MLA and MP details (alias for readAll)
+    public function readAllWithDetails() {
+        return $this->readAll();
     }
 }
 ?>

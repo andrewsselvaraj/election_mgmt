@@ -1,6 +1,5 @@
 <?php
 require_once 'config.php';
-require_once 'ContextualBoothProcessor.php';
 require_once 'dynamic_breadcrumb.php';
 
 // Demo with sample data
@@ -36,9 +35,9 @@ $dynamicBreadcrumb = new DynamicBreadcrumb($pdo);
                 </div>
                 
                 <div class="step">
-                    <h3>Step 3: Upload Booths</h3>
-                    <p>Click "📤 Upload Booths" button</p>
-                    <code>📊 MP Master → 📊 [MP Name] → 🏛️ [MLA Name] → 📤 Upload Booth Data</code>
+                    <h3>Step 3: Add Booths</h3>
+                    <p>Click "➕ Add Booth" button to add individual booth records</p>
+                    <code>📊 MP Master → 📊 [MP Name] → 🏛️ [MLA Name] → ➕ Add Booth</code>
                 </div>
             </div>
         </div>
@@ -54,7 +53,7 @@ $dynamicBreadcrumb = new DynamicBreadcrumb($pdo);
             <?php echo $dynamicBreadcrumb->getBreadcrumbForPage('mla_detail.php', ['mp_id' => $demoMpId, 'mla_id' => $demoMlaId]); ?>
             
             <h3>At Upload Level:</h3>
-            <?php echo $dynamicBreadcrumb->getBreadcrumbForPage('contextual_booth_upload.php', ['mp_id' => $demoMpId, 'mla_id' => $demoMlaId]); ?>
+            <?php echo $dynamicBreadcrumb->getBreadcrumbForPage('booth_add.php', ['mp_id' => $demoMpId, 'mla_id' => $demoMlaId]); ?>
         </div>
         
         <div class="demo-section">
@@ -75,7 +74,7 @@ $dynamicBreadcrumb = new DynamicBreadcrumb($pdo);
                     <h3>✅ New Way (Contextual)</h3>
                     <ul>
                         <li>Navigate to desired MLA</li>
-                        <li>Click "Upload Booths" button</li>
+                        <li>Click "Add Booth" button to add individual records</li>
                         <li>Only booth data in CSV</li>
                         <li>Automatic context setting</li>
                         <li>User-friendly process</li>
@@ -88,10 +87,12 @@ $dynamicBreadcrumb = new DynamicBreadcrumb($pdo);
             <h2>📋 CSV Template Example</h2>
             <p>Here's the simplified CSV format for booth uploads:</p>
             <div class="code-block">
-                <pre><?php 
-                $processor = new ContextualBoothProcessor($pdo, $demoMlaId);
-                echo htmlspecialchars($processor->generateTemplate());
-                ?></pre>
+                <pre>sl_no,polling_station_no,location_name_of_building,polling_areas,polling_station_type
+1,001,Government School Building,Area 1-5,Regular
+2,002,Community Hall,Area 6-10,Regular
+3,003,Primary School,Area 11-15,Auxiliary
+4,004,High School,Area 16-20,Special
+5,005,Panchayat Office,Area 21-25,Mobile</pre>
             </div>
         </div>
         

@@ -1,276 +1,281 @@
 <?php
 require_once 'config.php';
-require_once 'MPMaster.php';
 require_once 'Auth.php';
+require_once 'MPMaster.php';
+require_once 'MLAMaster.php';
+require_once 'BoothMaster.php';
+require_once 'VoterMaster.php';
+require_once 'UserMaster.php';
 
 $auth = new Auth($pdo);
 $auth->requireLogin();
 
-$mpMaster = new MPMaster($pdo);
-$message = '';
-$messageType = '';
 $currentUser = $auth->getCurrentUser();
 
-// Handle form submissions
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    if (isset($_POST['action'])) {
-        switch ($_POST['action']) {
-            case 'create':
-                if (!$auth->hasPermission('mp', 'create')) {
-                    $message = 'You do not have permission to create MP records!';
-                    $messageType = 'error';
-                    break;
-                }
-                
-                try {
-                    $data = [
-                        'mp_constituency_code' => $_POST['mp_constituency_code'],
-                        'mp_constituency_name' => $_POST['mp_constituency_name'],
-                        'state' => $_POST['state'],
-                        'created_by' => $currentUser['first_name'] . ' ' . $currentUser['last_name']
-                    ];
-                    
-                    if ($mpMaster->codeExists($data['mp_constituency_code'])) {
-                        $message = 'Constituency code already exists!';
-                        $messageType = 'error';
-                    } else {
-                        if ($mpMaster->create($data)) {
-                            $message = 'MP record created successfully!';
-                            $messageType = 'success';
-                        } else {
-                            $message = 'Failed to create record!';
-                            $messageType = 'error';
-                        }
-                    }
-                } catch (Exception $e) {
-                    $message = $e->getMessage();
-                    $messageType = 'error';
-                }
-                break;
-                
-            case 'update':
-                if (!$auth->hasPermission('mp', 'update')) {
-                    $message = 'You do not have permission to update MP records!';
-                    $messageType = 'error';
-                    break;
-                }
-                
-                try {
-                    $data = [
-                        'mp_constituency_code' => $_POST['mp_constituency_code'],
-                        'mp_constituency_name' => $_POST['mp_constituency_name'],
-                        'state' => $_POST['state'],
-                        'updated_by' => $currentUser['first_name'] . ' ' . $currentUser['last_name']
-                    ];
-                    
-                    if ($mpMaster->codeExists($data['mp_constituency_code'], $_POST['mp_id'])) {
-                        $message = 'Constituency code already exists!';
-                        $messageType = 'error';
-                    } else {
-                        if ($mpMaster->update($_POST['mp_id'], $data)) {
-                            $message = 'MP record updated successfully!';
-                            $messageType = 'success';
-                        } else {
-                            $message = 'Failed to update record!';
-                            $messageType = 'error';
-                        }
-                    }
-                } catch (Exception $e) {
-                    $message = $e->getMessage();
-                    $messageType = 'error';
-                }
-                break;
-                
-            case 'delete':
-                if (!$auth->hasPermission('mp', 'delete')) {
-                    $message = 'You do not have permission to delete MP records!';
-                    $messageType = 'error';
-                    break;
-                }
-                
-                try {
-                    if ($mpMaster->delete($_POST['mp_id'])) {
-                        $message = 'MP record deleted successfully!';
-                        $messageType = 'success';
-                    } else {
-                        $message = 'Failed to delete record!';
-                        $messageType = 'error';
-                    }
-                } catch (Exception $e) {
-                    $message = $e->getMessage();
-                    $messageType = 'error';
-                }
-                break;
-        }
-    }
-}
+// Get statistics from all modules
+$mpMaster = new MPMaster($pdo);
+$mlaMaster = new MLAMaster($pdo);
+$boothMaster = new BoothMaster($pdo);
+$voterMaster = new VoterMaster($pdo);
+$userMaster = new UserMaster($pdo);
 
-// Handle search
-$searchTerm = isset($_GET['search']) ? $_GET['search'] : '';
-$records = $searchTerm ? $mpMaster->search($searchTerm) : $mpMaster->readAll();
+$mpStats = $mpMaster->getStatistics();
+$mlaStats = $mlaMaster->getStatistics();
+$boothStats = $boothMaster->getStatistics();
+$voterStats = $voterMaster->getStatistics();
+$userStats = $userMaster->getStatistics();
 
-// Get states for dropdown
-$states = $mpMaster->getStates();
+$pageTitle = 'Election Management System - Dashboard';
+include 'header.php';
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MP Master Management</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <div class="container">
-        <div class="header-section">
-            <h1>MP Master Management System</h1>
-            <div class="header-actions">
-                <a href="upload.php" class="btn btn-secondary">📤 Upload Excel</a>
-                <a href="mla_index.php" class="btn btn-primary">🏛️ MLA Master</a>
-                <a href="booth_index.php" class="btn btn-primary">🏛️ Booth Master</a>
-                <?php if ($auth->hasPermission('users', 'read')): ?>
-                    <a href="user_management.php" class="btn btn-warning">👥 Users</a>
-                <?php endif; ?>
-                <a href="logout.php" class="btn btn-danger">🚪 Logout</a>
-            </div>
+<style>
+    .dashboard-container {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+    
+    .welcome-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 40px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    
+    .welcome-section h1 {
+        margin: 0 0 10px 0;
+        font-size: 2.5em;
+        font-weight: bold;
+    }
+    
+    .welcome-section p {
+        margin: 0;
+        font-size: 1.2em;
+        opacity: 0.9;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .stat-card {
+        background: white;
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        text-align: center;
+        transition: transform 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .stat-card h3 {
+        margin: 0 0 15px 0;
+        color: #333;
+        font-size: 1.1em;
+    }
+    
+    .stat-number {
+        font-size: 2.5em;
+        font-weight: bold;
+        margin: 0 0 10px 0;
+    }
+    
+    .stat-card.mp { border-top: 4px solid #007bff; }
+    .stat-card.mla { border-top: 4px solid #28a745; }
+    .stat-card.booth { border-top: 4px solid #ffc107; }
+    .stat-card.voter { border-top: 4px solid #dc3545; }
+    .stat-card.user { border-top: 4px solid #6f42c1; }
+    
+    .stat-card.mp .stat-number { color: #007bff; }
+    .stat-card.mla .stat-number { color: #28a745; }
+    .stat-card.booth .stat-number { color: #ffc107; }
+    .stat-card.voter .stat-number { color: #dc3545; }
+    .stat-card.user .stat-number { color: #6f42c1; }
+    
+    .modules-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 25px;
+        margin-bottom: 30px;
+    }
+    
+    .module-card {
+        background: white;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+    }
+    
+    .module-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .module-card h3 {
+        margin: 0 0 15px 0;
+        color: #333;
+        font-size: 1.3em;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .module-card p {
+        color: #666;
+        margin: 0 0 20px 0;
+        line-height: 1.6;
+    }
+    
+    .module-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    
+    .btn {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary {
+        background: #007bff;
+        color: white;
+    }
+    
+    .btn-success {
+        background: #28a745;
+        color: white;
+    }
+    
+    .btn-warning {
+        background: #ffc107;
+        color: #212529;
+    }
+    
+    .btn-danger {
+        background: #dc3545;
+        color: white;
+    }
+    
+    .btn-info {
+        background: #17a2b8;
+        color: white;
+    }
+    
+    .btn:hover {
+        opacity: 0.9;
+        transform: translateY(-2px);
+    }
+</style>
+
+<div class="dashboard-container">
+    <!-- Statistics Overview -->
+    <div class="stats-grid">
+        <div class="stat-card mp">
+            <h3>📊 MP Constituencies</h3>
+            <div class="stat-number"><?php echo $mpStats['total_mp_constituencies'] ?? 0; ?></div>
+            <p>Total MP Records</p>
         </div>
         
-        <div class="user-info">
-            <p>Welcome, <strong><?php echo htmlspecialchars($currentUser['first_name'] . ' ' . $currentUser['last_name']); ?></strong> 
-               (<?php echo implode(', ', $currentUser['roles']); ?>)</p>
+        <div class="stat-card mla">
+            <h3>🏛️ MLA Constituencies</h3>
+            <div class="stat-number"><?php echo $mlaStats['total_mla_constituencies'] ?? 0; ?></div>
+            <p>Total MLA Records</p>
         </div>
         
-        <!-- Dynamic Breadcrumb Navigation -->
-        <?php 
-        require_once 'dynamic_breadcrumb.php';
-        $dynamicBreadcrumb = new DynamicBreadcrumb($pdo);
-        echo $dynamicBreadcrumb->getBreadcrumbForPage('index.php');
-        ?>
-        
-        <?php if ($message): ?>
-            <div class="message <?php echo $messageType; ?>">
-                <?php echo htmlspecialchars($message); ?>
-            </div>
-        <?php endif; ?>
-        
-        <!-- Add/Edit Form -->
-        <?php if ($auth->hasPermission('mp', 'create') || $auth->hasPermission('mp', 'update')): ?>
-        <div class="form-container">
-            <h2 id="form-title">Add New MP Record</h2>
-            <form id="mp-form" method="POST">
-                <input type="hidden" name="action" id="form-action" value="create">
-                <input type="hidden" name="mp_id" id="mp_id">
-                
-                <div class="form-group">
-                    <label for="mp_constituency_code">Constituency Code:</label>
-                    <input type="number" id="mp_constituency_code" name="mp_constituency_code" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="mp_constituency_name">Constituency Name:</label>
-                    <input type="text" id="mp_constituency_name" name="mp_constituency_name" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="state">State:</label>
-                    <input type="text" id="state" name="state" list="states" value="Tamil Nadu" required>
-                    <datalist id="states">
-                        <?php foreach ($states as $state): ?>
-                            <option value="<?php echo htmlspecialchars($state); ?>">
-                        <?php endforeach; ?>
-                    </datalist>
-                </div>
-                
-                
-                <div class="form-group" id="updated_by_group" style="display: none;">
-                    <label for="updated_by">Updated By:</label>
-                    <input type="text" id="updated_by" name="updated_by">
-                </div>
-                
-                <div class="form-actions">
-                    <button type="submit" id="submit-btn">Add Record</button>
-                    <button type="button" id="cancel-btn" style="display: none;">Cancel</button>
-                </div>
-            </form>
+        <div class="stat-card booth">
+            <h3>🏛️ Polling Booths</h3>
+            <div class="stat-number"><?php echo $boothStats['total_booths'] ?? 0; ?></div>
+            <p>Total Booth Records</p>
         </div>
-        <?php endif; ?>
         
-        <!-- Search and Records -->
-        <div class="records-container">
-            <div class="search-container">
-                <form method="GET" class="search-form">
-                    <input type="text" name="search" placeholder="Search by name or state..." 
-                           value="<?php echo htmlspecialchars($searchTerm); ?>">
-                    <button type="submit">Search</button>
-                    <?php if ($searchTerm): ?>
-                        <a href="index.php" class="clear-search">Clear Search</a>
-                    <?php endif; ?>
-                </form>
-            </div>
-            
-            <div class="records-table">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Code</th>
-                            <th>Constituency Name</th>
-                            <th>State</th>
-                            <th>Created By</th>
-                            <th>Updated By</th>
-                            <th>Created</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php if (empty($records)): ?>
-                            <tr>
-                                <td colspan="7" class="no-data">No records found</td>
-                            </tr>
-                        <?php else: ?>
-                            <?php foreach ($records as $record): ?>
-                                <tr>
-                                    <td><?php echo htmlspecialchars($record['mp_constituency_code']); ?></td>
-                                    <td><?php echo htmlspecialchars($record['mp_constituency_name']); ?></td>
-                                    <td><?php echo htmlspecialchars($record['state']); ?></td>
-                                    <td><?php echo htmlspecialchars($record['created_by']); ?></td>
-                                    <td><?php echo htmlspecialchars($record['updated_by'] ?? 'N/A'); ?></td>
-                                    <td><?php echo date('Y-m-d', strtotime($record['created_at'])); ?></td>
-                                    <td class="actions">
-                                        <a href="mp_detail.php?mp_id=<?php echo $record['mp_id']; ?>" class="btn btn-primary">View MLAs</a>
-                                        <?php if ($auth->hasPermission('mp', 'update')): ?>
-                                            <button onclick="editRecord('<?php echo $record['mp_id']; ?>')" class="edit-btn">Edit</button>
-                                        <?php endif; ?>
-                                        <?php if ($auth->hasPermission('mp', 'delete')): ?>
-                                            <button onclick="deleteRecord('<?php echo $record['mp_id']; ?>', '<?php echo htmlspecialchars($record['mp_constituency_name']); ?>')" class="delete-btn">Delete</button>
-                                        <?php endif; ?>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-            </div>
+        <div class="stat-card voter">
+            <h3>🗳️ Voters</h3>
+            <div class="stat-number"><?php echo $voterStats['total'] ?? 0; ?></div>
+            <p>Total Voter Records</p>
+        </div>
+        
+        <div class="stat-card user">
+            <h3>👥 Users</h3>
+            <div class="stat-number"><?php echo $userStats['total'] ?? 0; ?></div>
+            <p>System Users</p>
         </div>
     </div>
     
-    <!-- Delete Confirmation Modal -->
-    <div id="delete-modal" class="modal">
-        <div class="modal-content">
-            <h3>Confirm Delete</h3>
-            <p>Are you sure you want to delete this record?</p>
-            <p id="delete-record-name"></p>
-            <form method="POST" id="delete-form">
-                <input type="hidden" name="action" value="delete">
-                <input type="hidden" name="mp_id" id="delete-mp-id">
-                <div class="modal-actions">
-                    <button type="submit" class="confirm-delete">Yes, Delete</button>
-                    <button type="button" onclick="closeModal()" class="cancel-delete">Cancel</button>
-                </div>
-            </form>
+    <!-- Module Cards -->
+    <div class="modules-grid">
+        <!-- MP Master Module -->
+        <div class="module-card">
+            <h3>📊 MP Master</h3>
+            <p>Manage Member of Parliament constituencies, their details, and associated data.</p>
+            <div class="module-actions">
+                <a href="mp_view.php" class="btn btn-primary">View MPs</a>
+                <a href="mp_add.php" class="btn btn-success">Add MP</a>
+                <a href="upload.php" class="btn btn-info">Upload Data</a>
+            </div>
         </div>
+        
+        <!-- MLA Master Module -->
+        <div class="module-card">
+            <h3>🏛️ MLA Master</h3>
+            <p>Manage Member of Legislative Assembly constituencies and their information.</p>
+            <div class="module-actions">
+                <a href="mla_index.php" class="btn btn-primary">View MLAs</a>
+                <a href="mla_add.php" class="btn btn-success">Add MLA</a>
+                <a href="mla_upload.php" class="btn btn-info">Upload Data</a>
+            </div>
+        </div>
+        
+        <!-- Booth Master Module -->
+        <div class="module-card">
+            <h3>🏛️ Booth Master</h3>
+            <p>Manage polling booths, their locations, and associated details.</p>
+            <div class="module-actions">
+                <a href="booth_index.php" class="btn btn-primary">View Booths</a>
+                <a href="booth_add.php" class="btn btn-success">Add Booth</a>
+                <a href="booth_upload.php" class="btn btn-info">Upload Data</a>
+            </div>
+        </div>
+        
+        <!-- Voter Information Module -->
+        <div class="module-card">
+            <h3>🗳️ Voter Information</h3>
+            <p>Manage voter records, demographics, and voting information.</p>
+            <div class="module-actions">
+                <a href="voter_view.php" class="btn btn-primary">View Voters</a>
+                <a href="voter_add.php" class="btn btn-success">Add Voter</a>
+                <a href="voter_upload.php" class="btn btn-info">Upload Data</a>
+            </div>
+        </div>
+        
+        <!-- User Management Module -->
+        <?php if ($auth->hasPermission('user', 'read')): ?>
+        <div class="module-card">
+            <h3>👥 User Management</h3>
+            <p>Manage system users, roles, and permissions.</p>
+            <div class="module-actions">
+                <a href="user_view.php" class="btn btn-primary">View Users</a>
+                <a href="user_add.php" class="btn btn-success">Add User</a>
+                <a href="user_management.php" class="btn btn-info">Manage</a>
+            </div>
+        </div>
+        <?php endif; ?>
     </div>
-    
-    <script src="script.js"></script>
-</body>
-</html>
+</div>
+
+<?php include 'footer.php'; ?>

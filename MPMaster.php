@@ -28,7 +28,7 @@ class MPMaster {
     // Read all MP records
     public function readAll() {
         try {
-            $sql = "SELECT * FROM MP_Master ORDER BY mp_constituency_name";
+            $sql = "SELECT * FROM MP_Master ORDER BY mp_constituency_code";
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute();
             return $stmt->fetchAll();
@@ -51,7 +51,7 @@ class MPMaster {
     }
     
     // Update an MP record
-    public function update($id, $data) {
+    public function update($data) {
         try {
             $sql = "UPDATE MP_Master SET 
                     mp_constituency_code = :code,
@@ -64,7 +64,7 @@ class MPMaster {
             $stmt->bindParam(':name', $data['mp_constituency_name']);
             $stmt->bindParam(':state', $data['state']);
             $stmt->bindParam(':updated_by', $data['updated_by']);
-            $stmt->bindParam(':id', $id);
+            $stmt->bindParam(':id', $data['mp_id']);
             
             return $stmt->execute();
         } catch(PDOException $e) {
@@ -90,7 +90,7 @@ class MPMaster {
             $sql = "SELECT * FROM MP_Master 
                     WHERE mp_constituency_name LIKE :search 
                     OR state LIKE :search
-                    ORDER BY mp_constituency_name";
+                    ORDER BY mp_constituency_code";
             $stmt = $this->pdo->prepare($sql);
             $searchPattern = "%$searchTerm%";
             $stmt->bindParam(':search', $searchPattern);
@@ -129,6 +129,45 @@ class MPMaster {
             return $stmt->fetchColumn() > 0;
         } catch(PDOException $e) {
             throw new Exception("Error checking code: " . $e->getMessage());
+        }
+    }
+    
+    // Get statistics for MP records
+    public function getStatistics() {
+        try {
+            $stats = [];
+            
+            // Total MP constituencies
+            $sql = "SELECT COUNT(*) as total FROM MP_Master";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute();
+            $stats['total_mp_constituencies'] = $stmt->fetchColumn();
+            
+            // Active records (assuming all are active for now)
+            $stats['active_records'] = $stats['total_mp_constituencies'];
+            
+            // States covered
+            $sql = "SELECT COUNT(DISTINCT state) as states FROM MP_Master";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute();
+            $stats['states_covered'] = $stmt->fetchColumn();
+            
+            return $stats;
+        } catch(PDOException $e) {
+            throw new Exception("Error getting statistics: " . $e->getMessage());
+        }
+    }
+    
+    // Get count of associated MLA records
+    public function getAssociatedMLACount($mpId) {
+        try {
+            $sql = "SELECT COUNT(*) FROM MLA_Master WHERE mp_id = :mp_id";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->bindParam(':mp_id', $mpId);
+            $stmt->execute();
+            return $stmt->fetchColumn();
+        } catch(PDOException $e) {
+            throw new Exception("Error getting MLA count: " . $e->getMessage());
         }
     }
 }

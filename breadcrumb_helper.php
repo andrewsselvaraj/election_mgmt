@@ -33,8 +33,8 @@ class BreadcrumbHelper {
         // Upload page mappings
         $uploadPages = [
             'upload.php' => 'mp',
-            'mla_upload.php' => 'mla', 
-            'booth_upload.php' => 'booth'
+            'mla_upload.php' => 'mla',
+            'excel_upload_preview.php' => 'excel'
         ];
         
         // Determine the main section based on current page
@@ -138,11 +138,12 @@ class BreadcrumbHelper {
                     ]
                 ]);
                 
-            case 'booth_upload.php':
-                return self::render('booth_upload.php', [
+                
+            case 'excel_upload_preview.php':
+                return self::render('excel_upload_preview.php', [
                     [
-                        'label' => '📤 Upload Booth Data',
-                        'title' => 'Upload Polling Booth Data'
+                        'label' => '📤 Excel Upload & Preview',
+                        'title' => 'Upload and Preview Excel/CSV Files'
                     ]
                 ]);
                 

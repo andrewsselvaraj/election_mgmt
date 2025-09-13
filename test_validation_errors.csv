@@ -1,0 +1,11 @@
+mla_constituency_code,sl_no,polling_station_no,location_name_of_building,polling_areas,polling_station_type
+999,1,001,Invalid MLA School,Area A,Regular
+1,0,002,Zero SL No School,Area B,Regular
+1,3,003,Duplicate Station School,Area C,Regular
+1,3,003,Duplicate Station School,Area C,Regular
+1,4,,Empty Station No School,Area D,Regular
+1,5,005,Invalid Type School,Area E,INVALID_TYPE
+,6,006,Empty MLA Code School,Area F,Regular
+1,7,007,Valid School,Area G,Regular
+1,8,008,Another Valid School,Area H,Auxiliary
+1,9,009,Third Valid School,Area I,Special

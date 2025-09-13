@@ -214,8 +214,8 @@ $dynamicBreadcrumb = new DynamicBreadcrumb($pdo);
                     </div>
                     
                     <div class="feature-card">
-                        <h3>🗺️ Upload with Mapping</h3>
-                        <p>Advanced upload with column mapping and preview</p>
+                        <h3>📤 Excel Upload & Preview</h3>
+                        <p>Direct Excel/CSV upload with validation and preview</p>
                         <ul class="step-list">
                             <li><span class="step-number">1</span>Upload any CSV/Excel file</li>
                             <li><span class="step-number">2</span>Preview data (first 10 rows)</li>
@@ -235,7 +235,7 @@ $dynamicBreadcrumb = new DynamicBreadcrumb($pdo);
                         <tr>
                             <th>Feature</th>
                             <th>Quick Upload</th>
-                            <th>Upload with Mapping</th>
+                            <th>Excel Upload & Preview</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -303,7 +303,7 @@ $dynamicBreadcrumb = new DynamicBreadcrumb($pdo);
                 
                 <div class="pros-cons">
                     <div class="pros">
-                        <h4>✅ Upload with Mapping</h4>
+                        <h4>✅ Excel Upload & Preview</h4>
                         <ul>
                             <li>Works with any column names</li>
                             <li>Data preview before processing</li>
@@ -313,7 +313,7 @@ $dynamicBreadcrumb = new DynamicBreadcrumb($pdo);
                         </ul>
                     </div>
                     <div class="cons">
-                        <h4>❌ Upload with Mapping</h4>
+                        <h4>❌ Excel Upload & Preview</h4>
                         <ul>
                             <li>More steps required</li>
                             <li>User needs to map columns</li>
@@ -346,7 +346,7 @@ $dynamicBreadcrumb = new DynamicBreadcrumb($pdo);
                     <a href="sample_booth_data.csv" class="btn btn-success" download>📥 Download Sample CSV</a>
                 </div>
                 <p style="text-align: center; margin-top: 20px; color: #6c757d;">
-                    <strong>How to test:</strong> Navigate to MP Master → View MLAs → View Booths → Upload with Mapping
+                    <strong>How to test:</strong> Navigate to MP Master → View MLAs → View Booths → Upload Booth Data
                 </p>
             </div>
         </div>

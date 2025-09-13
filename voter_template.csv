@@ -1,0 +1,6 @@
+voter_id,mla_id,voter_name,father_name,mother_name,husband_name,age,gender,address,phone,email,booth_id,ward_no,part_no
+V001,1,John Doe,Robert Doe,Mary Doe,,25,Male,123 Main Street,City,1234567890,john@example.com,BOOTH001,W001,P001
+V002,1,Jane Smith,John Smith,Mary Smith,Robert Smith,30,Female,456 Oak Avenue,City,0987654321,jane@example.com,BOOTH001,W001,P001
+V003,1,Mike Johnson,David Johnson,Sarah Johnson,,22,Male,789 Pine Road,City,1122334455,mike@example.com,BOOTH002,W001,P002
+V004,1,Lisa Brown,Michael Brown,Linda Brown,James Brown,28,Female,321 Elm Street,City,5566778899,lisa@example.com,BOOTH002,W002,P001
+V005,1,Alex Wilson,Chris Wilson,Anna Wilson,,35,Other,654 Maple Drive,City,9988776655,alex@example.com,BOOTH003,W002,P002

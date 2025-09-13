@@ -1,0 +1,11 @@
+mla_constituency_code,sl_no,polling_station_no,location_name_of_building,polling_areas,polling_station_type
+1,1,001,Government Higher Secondary School,Areas 1-5,Regular
+1,2,002,Panchayat Union Primary School,Areas 6-10,Regular
+1,3,003,Community Hall,Areas 11-15,Auxiliary
+1,4,004,Private School Building,Areas 16-20,Special
+1,5,005,Government Middle School,Areas 21-25,Mobile
+2,1,001,Government High School,Areas 1-8,Regular
+2,2,002,Anganwadi Center,Areas 9-16,Regular
+2,3,003,Religious Institution,Areas 17-24,Auxiliary
+2,4,004,Private College,Areas 25-32,Special
+2,5,005,Government Primary School,Areas 33-40,Mobile

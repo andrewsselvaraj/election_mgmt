@@ -31,7 +31,7 @@ class MLAMaster {
             $sql = "SELECT mla.*, mp.mp_constituency_name, mp.state 
                     FROM MLA_Master mla 
                     JOIN MP_Master mp ON mla.mp_id = mp.mp_id 
-                    ORDER BY mp.mp_constituency_name, mla.mla_constituency_name";
+                    ORDER BY mp.mp_constituency_code, mla.mla_constituency_code";
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute();
             return $stmt->fetchAll();
@@ -99,7 +99,7 @@ class MLAMaster {
                     WHERE mla.mla_constituency_name LIKE :search 
                     OR mp.mp_constituency_name LIKE :search
                     OR mp.state LIKE :search
-                    ORDER BY mp.mp_constituency_name, mla.mla_constituency_name";
+                    ORDER BY mp.mp_constituency_code, mla.mla_constituency_code";
             $stmt = $this->pdo->prepare($sql);
             $searchPattern = "%$searchTerm%";
             $stmt->bindParam(':search', $searchPattern);
@@ -113,7 +113,7 @@ class MLAMaster {
     // Get MLA records by MP ID
     public function getByMPId($mpId) {
         try {
-            $sql = "SELECT * FROM MLA_Master WHERE mp_id = :mp_id ORDER BY mla_constituency_name";
+            $sql = "SELECT * FROM MLA_Master WHERE mp_id = :mp_id ORDER BY mla_constituency_code";
             $stmt = $this->pdo->prepare($sql);
             $stmt->bindParam(':mp_id', $mpId);
             $stmt->execute();
@@ -126,7 +126,7 @@ class MLAMaster {
     // Get all MP records for dropdown
     public function getMPRecords() {
         try {
-            $sql = "SELECT mp_id, mp_constituency_name, state FROM MP_Master ORDER BY mp_constituency_name";
+            $sql = "SELECT mp_id, mp_constituency_name, state FROM MP_Master ORDER BY mp_constituency_code";
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute();
             return $stmt->fetchAll();
@@ -168,6 +168,37 @@ class MLAMaster {
         } catch(PDOException $e) {
             throw new Exception("Error getting MLA statistics: " . $e->getMessage());
         }
+    }
+    
+    // Get statistics for MLA records (compatible with view pages)
+    public function getStatistics() {
+        try {
+            $stats = [];
+            
+            // Total MLA constituencies
+            $sql = "SELECT COUNT(*) as total FROM MLA_Master";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute();
+            $stats['total_mla_constituencies'] = $stmt->fetchColumn();
+            
+            // Active records (assuming all are active for now)
+            $stats['active_records'] = $stats['total_mla_constituencies'];
+            
+            // Total MP constituencies
+            $sql = "SELECT COUNT(DISTINCT mp_id) as total FROM MLA_Master";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute();
+            $stats['total_mp_constituencies'] = $stmt->fetchColumn();
+            
+            return $stats;
+        } catch(PDOException $e) {
+            throw new Exception("Error getting statistics: " . $e->getMessage());
+        }
+    }
+    
+    // Read all MLA records with MP details (alias for readAll)
+    public function readAllWithMP() {
+        return $this->readAll();
     }
 }
 ?>

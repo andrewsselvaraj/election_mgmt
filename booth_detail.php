@@ -62,7 +62,9 @@ $currentUser = $auth->getCurrentUser();
             <div class="header-actions">
                 <a href="mla_detail.php?mp_id=<?php echo $mpId; ?>&mla_id=<?php echo $mlaId; ?>" class="btn btn-secondary">← Back to MLA</a>
                 <a href="mp_detail.php?mp_id=<?php echo $mpId; ?>" class="btn btn-secondary">← Back to MP</a>
-                <a href="index.php" class="btn btn-secondary">📊 All MPs</a>
+                <a href="mp_view.php" class="btn btn-secondary">📊 MP Master</a>
+                <a href="mla_view.php" class="btn btn-secondary">🏛️ MLA Master</a>
+                <a href="booth_view.php" class="btn btn-primary current-page">🏛️ Booth Master</a>
                 <a href="logout.php" class="btn btn-danger">🚪 Logout</a>
             </div>
         </div>
@@ -88,6 +90,7 @@ $currentUser = $auth->getCurrentUser();
                     </span>
                 </p>
                 <p><strong>Polling Areas:</strong> <?php echo htmlspecialchars($boothData['polling_areas'] ?: 'Not specified'); ?></p>
+                <p><strong>Notes:</strong> <?php echo htmlspecialchars($boothData['notes'] ?: 'No notes available'); ?></p>
                 <p><strong>MLA Constituency:</strong> <?php echo htmlspecialchars($mlaData['mla_constituency_name']); ?></p>
                 <p><strong>MP Constituency:</strong> <?php echo htmlspecialchars($mpData['mp_constituency_name']); ?></p>
                 <p><strong>State:</strong> <?php echo htmlspecialchars($mpData['state']); ?></p>

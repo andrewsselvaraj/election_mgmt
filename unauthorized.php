@@ -1,70 +1,82 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Unauthorized Access</title>
-    <link rel="stylesheet" href="style.css">
-    <style>
-        body {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0;
-            padding: 20px;
-        }
-        
-        .unauthorized-container {
-            background: white;
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-            text-align: center;
-            max-width: 500px;
-        }
-        
-        .unauthorized-icon {
-            font-size: 4em;
-            color: #ff6b6b;
-            margin-bottom: 20px;
-        }
-        
-        .unauthorized-container h1 {
-            color: #2c3e50;
-            margin-bottom: 15px;
-        }
-        
-        .unauthorized-container p {
-            color: #666;
-            margin-bottom: 30px;
-            line-height: 1.6;
-        }
-        
-        .btn {
-            display: inline-block;
-            padding: 12px 24px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: bold;
-            transition: transform 0.2s;
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-        }
-    </style>
-</head>
-<body>
-    <div class="unauthorized-container">
-        <div class="unauthorized-icon">🚫</div>
-        <h1>Access Denied</h1>
-        <p>You don't have permission to access this page. Please contact your administrator if you believe this is an error.</p>
-        <a href="index.php" class="btn">Go to Dashboard</a>
-        <a href="logout.php" class="btn" style="margin-left: 10px; background: #95a5a6;">Logout</a>
+<?php
+$pageTitle = 'Unauthorized Access - Election Management System';
+include 'header.php';
+?>
+
+<style>
+    .unauthorized-container {
+        max-width: 600px;
+        margin: 0 auto;
+        text-align: center;
+        padding: 50px 20px;
+    }
+    
+    .unauthorized-icon {
+        font-size: 4em;
+        color: #dc3545;
+        margin-bottom: 20px;
+    }
+    
+    .unauthorized-title {
+        font-size: 2em;
+        color: #333;
+        margin-bottom: 15px;
+    }
+    
+    .unauthorized-message {
+        font-size: 1.1em;
+        color: #666;
+        margin-bottom: 30px;
+        line-height: 1.6;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary {
+        background: #007bff;
+        color: white;
+    }
+    
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+    
+    .btn:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+    }
+</style>
+
+<div class="unauthorized-container">
+    <div class="unauthorized-icon">🚫</div>
+    <h1 class="unauthorized-title">Access Denied</h1>
+    <p class="unauthorized-message">
+        You don't have permission to access this page. Please contact your administrator 
+        if you believe this is an error.
+    </p>
+    
+    <div class="action-buttons">
+        <a href="javascript:history.back()" class="btn btn-secondary">← Go Back</a>
+        <a href="mp_view.php" class="btn btn-primary">🏠 Home</a>
     </div>
-</body>
-</html>
+</div>
+
+<?php include 'footer.php'; ?>

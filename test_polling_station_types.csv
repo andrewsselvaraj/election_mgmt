@@ -1,0 +1,9 @@
+Sl.No,Polling station No.,Location and name of building in which Polling Station located,Polling Areas,Polling Station Type
+1,001,Government Higher Secondary School,Areas 1-5,Regular
+2,002,Panchayat Union Primary School,Areas 6-10,Auxiliary
+3,003,Community Hall,Areas 11-15,Special
+4,004,Government High School,Areas 1-8,Mobile
+5,005,Private School Building,Areas 9-12,INVALID_TYPE
+6,006,Another School,Areas 13-15,regular
+7,007,Test School,Areas 16-18,AUXILIARY
+8,008,Final School,Areas 19-20,Special

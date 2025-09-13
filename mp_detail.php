@@ -43,9 +43,9 @@ $currentUser = $auth->getCurrentUser();
         <div class="header-section">
             <h1>📊 MP Constituency Details</h1>
             <div class="header-actions">
-                <a href="index.php" class="btn btn-secondary">📊 All MPs</a>
-                <a href="mla_index.php" class="btn btn-secondary">🏛️ All MLAs</a>
-                <a href="booth_index.php" class="btn btn-secondary">🏛️ All Booths</a>
+                <a href="mp_view.php" class="btn btn-primary current-page">📊 MP Master</a>
+                <a href="mla_view.php" class="btn btn-secondary">🏛️ MLA Master</a>
+                <a href="booth_view.php" class="btn btn-secondary">🏛️ Booth Master</a>
                 <a href="logout.php" class="btn btn-danger">🚪 Logout</a>
             </div>
         </div>
