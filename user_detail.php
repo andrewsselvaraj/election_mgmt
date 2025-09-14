@@ -378,7 +378,7 @@ include 'header.php';
             <div class="permissions-section">
                 <h3>🔑 Permissions</h3>
                 <?php 
-                $permissions = json_decode($user['permissions'], true) ?: [];
+                $permissions = json_decode($user['permissions'] ?? '{}', true) ?: [];
                 $availablePermissions = [
                     'user' => ['create', 'read', 'update', 'delete'],
                     'booth' => ['create', 'read', 'update', 'delete'],

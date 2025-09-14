@@ -136,7 +136,7 @@ class MLAExcelProcessor {
     // Get MP ID by constituency code
     private function getMPIdByCode($mpCode) {
         try {
-            $sql = "SELECT mp_id FROM MP_Master WHERE mp_constituency_code = :code";
+            $sql = "SELECT mp_id FROM mp_master WHERE mp_constituency_code = :code";
             $stmt = $this->pdo->prepare($sql);
             $stmt->bindParam(':code', $mpCode);
             $stmt->execute();

@@ -11,7 +11,7 @@ class MPMaster {
     // Create a new MP record
     public function create($data) {
         try {
-            $sql = "INSERT INTO MP_Master (mp_constituency_code, mp_constituency_name, state, created_by) 
+            $sql = "INSERT INTO mp_master (mp_constituency_code, mp_constituency_name, state, created_by) 
                     VALUES (:code, :name, :state, :created_by)";
             $stmt = $this->pdo->prepare($sql);
             $stmt->bindParam(':code', $data['mp_constituency_code']);
@@ -28,7 +28,7 @@ class MPMaster {
     // Read all MP records
     public function readAll() {
         try {
-            $sql = "SELECT * FROM MP_Master ORDER BY mp_constituency_code";
+            $sql = "SELECT * FROM mp_master ORDER BY mp_constituency_code";
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute();
             return $stmt->fetchAll();
@@ -40,7 +40,7 @@ class MPMaster {
     // Read a single MP record by ID
     public function readById($id) {
         try {
-            $sql = "SELECT * FROM MP_Master WHERE mp_id = :id";
+            $sql = "SELECT * FROM mp_master WHERE mp_id = :id";
             $stmt = $this->pdo->prepare($sql);
             $stmt->bindParam(':id', $id);
             $stmt->execute();
@@ -53,7 +53,7 @@ class MPMaster {
     // Update an MP record
     public function update($data) {
         try {
-            $sql = "UPDATE MP_Master SET 
+            $sql = "UPDATE mp_master SET 
                     mp_constituency_code = :code,
                     mp_constituency_name = :name,
                     state = :state,
@@ -75,7 +75,7 @@ class MPMaster {
     // Delete an MP record
     public function delete($id) {
         try {
-            $sql = "DELETE FROM MP_Master WHERE mp_id = :id";
+            $sql = "DELETE FROM mp_master WHERE mp_id = :id";
             $stmt = $this->pdo->prepare($sql);
             $stmt->bindParam(':id', $id);
             return $stmt->execute();
@@ -87,7 +87,7 @@ class MPMaster {
     // Search MP records
     public function search($searchTerm) {
         try {
-            $sql = "SELECT * FROM MP_Master 
+            $sql = "SELECT * FROM mp_master 
                     WHERE mp_constituency_name LIKE :search 
                     OR state LIKE :search
                     ORDER BY mp_constituency_code";
@@ -104,7 +104,7 @@ class MPMaster {
     // Get unique states
     public function getStates() {
         try {
-            $sql = "SELECT DISTINCT state FROM MP_Master ORDER BY state";
+            $sql = "SELECT DISTINCT state FROM mp_master ORDER BY state";
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_COLUMN);
@@ -116,7 +116,7 @@ class MPMaster {
     // Check if constituency code already exists
     public function codeExists($code, $excludeId = null) {
         try {
-            $sql = "SELECT COUNT(*) FROM MP_Master WHERE mp_constituency_code = :code";
+            $sql = "SELECT COUNT(*) FROM mp_master WHERE mp_constituency_code = :code";
             if ($excludeId) {
                 $sql .= " AND mp_id != :exclude_id";
             }
@@ -138,7 +138,7 @@ class MPMaster {
             $stats = [];
             
             // Total MP constituencies
-            $sql = "SELECT COUNT(*) as total FROM MP_Master";
+            $sql = "SELECT COUNT(*) as total FROM mp_master";
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute();
             $stats['total_mp_constituencies'] = $stmt->fetchColumn();
@@ -147,7 +147,7 @@ class MPMaster {
             $stats['active_records'] = $stats['total_mp_constituencies'];
             
             // States covered
-            $sql = "SELECT COUNT(DISTINCT state) as states FROM MP_Master";
+            $sql = "SELECT COUNT(DISTINCT state) as states FROM mp_master";
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute();
             $stats['states_covered'] = $stmt->fetchColumn();
@@ -161,7 +161,7 @@ class MPMaster {
     // Get count of associated MLA records
     public function getAssociatedMLACount($mpId) {
         try {
-            $sql = "SELECT COUNT(*) FROM MLA_Master WHERE mp_id = :mp_id";
+            $sql = "SELECT COUNT(*) FROM mla_master WHERE mp_id = :mp_id";
             $stmt = $this->pdo->prepare($sql);
             $stmt->bindParam(':mp_id', $mpId);
             $stmt->execute();

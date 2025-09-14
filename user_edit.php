@@ -114,7 +114,7 @@ $availablePermissions = [
 ];
 
 // Get current permissions
-$currentPermissions = json_decode($user['permissions'], true) ?: [];
+$currentPermissions = json_decode($user['permissions'] ?? '{}', true) ?: [];
 ?>
 
 <?php

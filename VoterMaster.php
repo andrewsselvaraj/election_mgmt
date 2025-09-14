@@ -61,7 +61,7 @@ class VoterMaster {
         try {
             $sql = "SELECT v.*, m.mla_constituency_name, m.mla_name, b.polling_station_no, b.location_name_of_building
                     FROM voter_master v
-                    LEFT JOIN MLA_Master m ON v.mla_id = m.mla_id
+                    LEFT JOIN mla_master m ON v.mla_id = m.mla_id
                     LEFT JOIN booth_master b ON v.booth_id = b.booth_id
                     WHERE v.status = 'ACTIVE'
                     ORDER BY v.created_datetime DESC";
@@ -78,7 +78,7 @@ class VoterMaster {
         try {
             $sql = "SELECT v.*, m.mla_constituency_name, m.mla_name, b.polling_station_no, b.location_name_of_building
                     FROM voter_master v
-                    LEFT JOIN MLA_Master m ON v.mla_id = m.mla_id
+                    LEFT JOIN mla_master m ON v.mla_id = m.mla_id
                     LEFT JOIN booth_master b ON v.booth_id = b.booth_id
                     WHERE v.mla_id = :mla_id AND v.status = 'ACTIVE'
                     ORDER BY v.created_datetime DESC";
@@ -96,7 +96,7 @@ class VoterMaster {
         try {
             $sql = "SELECT v.*, m.mla_constituency_name, m.mla_name, b.polling_station_no, b.location_name_of_building
                     FROM voter_master v
-                    LEFT JOIN MLA_Master m ON v.mla_id = m.mla_id
+                    LEFT JOIN mla_master m ON v.mla_id = m.mla_id
                     LEFT JOIN booth_master b ON v.booth_id = b.booth_id
                     WHERE v.booth_id = :booth_id AND v.status = 'ACTIVE'
                     ORDER BY v.created_datetime DESC";
@@ -114,7 +114,7 @@ class VoterMaster {
         try {
             $sql = "SELECT v.*, m.mla_constituency_name, m.mla_name, b.polling_station_no, b.location_name_of_building
                     FROM voter_master v
-                    LEFT JOIN MLA_Master m ON v.mla_id = m.mla_id
+                    LEFT JOIN mla_master m ON v.mla_id = m.mla_id
                     LEFT JOIN booth_master b ON v.booth_id = b.booth_id
                     WHERE v.voter_unique_ID = :voter_unique_id AND v.status = 'ACTIVE'";
             $stmt = $this->pdo->prepare($sql);
@@ -235,7 +235,7 @@ class VoterMaster {
             // Voters by MLA
             $stmt = $this->pdo->query("SELECT m.mla_name, COUNT(v.voter_unique_ID) as count 
                                      FROM voter_master v 
-                                     LEFT JOIN MLA_Master m ON v.mla_id = m.mla_id 
+                                     LEFT JOIN mla_master m ON v.mla_id = m.mla_id 
                                      WHERE v.status = 'ACTIVE' 
                                      GROUP BY v.mla_id, m.mla_name 
                                      ORDER BY count DESC");
@@ -266,7 +266,7 @@ class VoterMaster {
         try {
             $sql = "SELECT v.*, m.mla_constituency_name, m.mla_name, b.polling_station_no, b.location_name_of_building
                     FROM voter_master v
-                    LEFT JOIN MLA_Master m ON v.mla_id = m.mla_id
+                    LEFT JOIN mla_master m ON v.mla_id = m.mla_id
                     LEFT JOIN booth_master b ON v.booth_id = b.booth_id
                     WHERE v.status = 'ACTIVE' AND 
                     (v.voter_name LIKE :search OR v.voter_id LIKE :search OR v.father_name LIKE :search OR 
@@ -287,7 +287,7 @@ class VoterMaster {
         try {
             $sql = "SELECT v.*, m.mla_constituency_name, m.mla_name, b.polling_station_no, b.location_name_of_building
                     FROM voter_master v
-                    LEFT JOIN MLA_Master m ON v.mla_id = m.mla_id
+                    LEFT JOIN mla_master m ON v.mla_id = m.mla_id
                     LEFT JOIN booth_master b ON v.booth_id = b.booth_id
                     WHERE v.ward_no = :ward_no AND v.status = 'ACTIVE'
                     ORDER BY v.created_datetime DESC";
@@ -305,7 +305,7 @@ class VoterMaster {
         try {
             $sql = "SELECT v.*, m.mla_constituency_name, m.mla_name, b.polling_station_no, b.location_name_of_building
                     FROM voter_master v
-                    LEFT JOIN MLA_Master m ON v.mla_id = m.mla_id
+                    LEFT JOIN mla_master m ON v.mla_id = m.mla_id
                     LEFT JOIN booth_master b ON v.booth_id = b.booth_id
                     WHERE v.part_no = :part_no AND v.status = 'ACTIVE'
                     ORDER BY v.created_datetime DESC";

@@ -42,7 +42,7 @@ $stats = $voterMaster->getStatistics();
 // Get MLAs for filter dropdown
 $mlas = [];
 try {
-    $stmt = $pdo->query("SELECT mla_id, mla_name, mla_constituency_name FROM MLA_Master ORDER BY mla_name");
+    $stmt = $pdo->query("SELECT mla_id, mla_name, mla_constituency_name FROM mla_master ORDER BY mla_name");
     $mlas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (Exception $e) {
     $mlas = [];

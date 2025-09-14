@@ -78,8 +78,8 @@ class Auth {
             'email' => $_SESSION['email'],
             'first_name' => $_SESSION['first_name'],
             'last_name' => $_SESSION['last_name'],
-            'roles' => $_SESSION['roles'],
-            'permissions' => $_SESSION['permissions']
+            'roles' => $_SESSION['roles'] ?? [$_SESSION['role'] ?? 'user'],
+            'permissions' => $_SESSION['permissions'] ?? []
         ];
     }
     
@@ -89,10 +89,11 @@ class Auth {
             return false;
         }
         
-        $permissions = $_SESSION['permissions'];
+        $permissions = $_SESSION['permissions'] ?? [];
+        $userRoles = $_SESSION['roles'] ?? [$_SESSION['role'] ?? 'user'];
         
         // Superadmin has all permissions
-        if (in_array('superadmin', $_SESSION['roles'])) {
+        if (in_array('superadmin', $userRoles) || in_array('admin', $userRoles)) {
             return true;
         }
         
@@ -121,7 +122,8 @@ class Auth {
             $roles = [$roles];
         }
         
-        return !empty(array_intersect($_SESSION['roles'], $roles));
+        $userRoles = $_SESSION['roles'] ?? [$_SESSION['role'] ?? 'user'];
+        return !empty(array_intersect($userRoles, $roles));
     }
     
     // Require login (redirect if not logged in)
